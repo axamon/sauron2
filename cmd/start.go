@@ -20,6 +20,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/spf13/viper"
+
 	"github.com/axamon/reperibili"
 	"github.com/axamon/sauron/cercasid"
 	"github.com/axamon/sms"
@@ -41,8 +43,13 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		//Recupera file reperibilita.csv dal file di congigurazione
+		reperibilita := viper.GetString("Reperibilita")
+
+		fmt.Println(reperibilita)
+
 		//fmt.Println(nagioslog, reperibilita)
-		//Verifica se il file dei log di nagios esiste
+		//Verifica se il file della reperibilita esiste e se è raggiungibile
 		if _, err := os.Stat(reperibilita); os.IsNotExist(err) {
 			fmt.Fprintln(os.Stderr, "Il file "+reperibilita+" non esiste oppure non accessibile")
 			os.Exit(1)
@@ -54,6 +61,7 @@ to quickly create a Cobra application.`,
 		fine.Whence = 2
 
 		//MustExist il file deve esistere Follow fa tail -f e ReOpen gestisce il logrotate
+		//il file nagioslog
 		t, err := tail.TailFile(nagioslog,
 			tail.Config{
 				Location:  &fine,
@@ -86,14 +94,8 @@ to quickly create a Cobra application.`,
 				//debug
 				fmt.Println(TO, NOME, COGNOME)
 
-				/* sid, err := reperibili.Chiamareperibile(TO, NOME, COGNOME)
-				if err != nil {
-					fmt.Println("Errore", err.Error())
-				}
-				fmt.Println(sid)
-				*/
-
 				//Cerca di chiamare il reperibile per 3 volte
+				//TODO: se il problema rientra smettere di chiamare
 				go func() {
 					for n := 1; n < 5; n++ {
 						//chiamo per la n volta
