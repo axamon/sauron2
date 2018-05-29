@@ -180,33 +180,30 @@ var startCmd = &cobra.Command{
 func isfob() (ok bool) {
 	ora := time.Now()
 	giorno := ora.Weekday()
+	//Partiamo che non siamo in OB
+	ok = false
 
 	switch giorno {
 	//Se è sabato siamo in fob
 	case time.Saturday:
+		fmt.Println("E' sabato")
 		ok = true
-		return ok
 		//se è domenica siamo in fob
 	case time.Sunday:
+		fmt.Println("E' Domenica")
 		ok = true
-		return ok
 		//se è un giorno feriale dobbiamo vedere l'orario
 	default:
 		//se è dopo le 18 e 30 siamo in fob
-		fmt.Println("Giorno feriale", viper.GetInt("foborainizio"))
-		if ora.Hour() > viper.GetInt("foborainizio") && ora.Minute() > 30 {
+		if ora.Hour() > viper.GetInt("foborainizio") {
+			//fmt.Println("Giorno feriale", viper.GetInt("foborainizio"))
 			ok = true
-			return ok
 		}
 		//se è prima delle 7 allora siamo in fob
 		if ora.Hour() < 7 {
 			ok = true
-			return ok
 		}
 	}
-	//in ogni altro caso siamo in ob
-	fmt.Println("siamo in OB")
-	ok = false
 	return ok
 }
 
