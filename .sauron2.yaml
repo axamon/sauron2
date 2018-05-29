@@ -4,5 +4,6 @@ Version: 0.3
 Reperibilita: ./reperibilita.csv
 twilioaccountsid: 
 twilioauthtoken:
+piattaforma: CDN
 numservicedesk: 0636875015
 foborainizio: 16

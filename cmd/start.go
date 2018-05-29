@@ -85,7 +85,7 @@ var startCmd = &cobra.Command{
 			case strings.Contains(line.Text, "NOTIFICATION") && strings.Contains(line.Text, "CRITICAL"):
 				fmt.Println(line.Text)
 				//TODO cambiare CDN con qualcosa di variabile
-				reperibile, _ := reperibili.Reperibiliperpiattaforma2("CDN", reperibilita)
+				reperibile, _ := reperibili.Reperibiliperpiattaforma2(viper.GetString("piattaforma"), reperibilita)
 
 				TO := reperibile.Cellulare
 				NOME := reperibile.Nome
@@ -186,11 +186,11 @@ func isfob() (ok bool) {
 	switch giorno {
 	//Se è sabato siamo in fob
 	case time.Saturday:
-		fmt.Println("E' sabato")
+		//fmt.Println("E' sabato")
 		ok = true
 		//se è domenica siamo in fob
 	case time.Sunday:
-		fmt.Println("E' Domenica")
+		//fmt.Println("E' Domenica")
 		ok = true
 		//se è un giorno feriale dobbiamo vedere l'orario
 	default:
