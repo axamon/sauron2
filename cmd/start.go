@@ -29,33 +29,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//Crea variabile per assegnare i valori presi dal file di configurazione viper
 var nagioslog, reperibilita string
 
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Sauron2 notifica a voce il reperibile in turno",
+	Long: `Saurno2 ascolta in tail sul file di nagios per pattern specifici
+	Se li riscontra allora contatta il reperibile in turno.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Recupera file reperibilita.csv dal file di congigurazione
 		reperibilita := viper.GetString("Reperibilita")
 
-		fmt.Println(reperibilita)
+		fmt.Println(reperibilita) //Debug
 
-		//fmt.Println(nagioslog, reperibilita)
 		//Verifica se il file della reperibilita esiste e se è raggiungibile
 		if _, err := os.Stat(reperibilita); os.IsNotExist(err) {
 			fmt.Fprintln(os.Stderr, "Il file "+reperibilita+" non esiste oppure non accessibile")
 			os.Exit(1)
 		}
 
-		//Inizia il tail dalla fine del file senza leggerlo dall'inizio
+		//Inizia il tail dalla fine del file leggendolo dalla fine
 		var fine tail.SeekInfo
 		fine.Offset = 0
 		fine.Whence = 2
@@ -70,16 +66,19 @@ to quickly create a Cobra application.`,
 				ReOpen:    true,
 			})
 
+		//Se ci sono problemi ad accedere al file nagioslog esce.
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
+
 		//Per ogni nuova linea nel file
+	LINE:
 		for line := range t.Lines {
 
 			//fmt.Println(line.Text) //per debug
 
-			//Se la linea è di notifica la analizza se no passa oltre
+			//Se la linea è di notifica, la analizza, se no passa oltre
 			//notificabool := strings.Contains(line.Text, "NOTIFICATION")
 			switch {
 
@@ -96,6 +95,12 @@ to quickly create a Cobra application.`,
 
 				//Cerca di chiamare il reperibile per 3 volte
 				//TODO: se il problema rientra smettere di chiamare
+				//Se non siamo in FOB non fare nulla
+				if isfob() == false {
+					fmt.Println("Siamo in orario base quindi niente notifiche")
+					continue LINE
+				}
+
 				go func() {
 					for n := 1; n < 5; n++ {
 						//chiamo per la n volta
@@ -170,6 +175,33 @@ to quickly create a Cobra application.`,
 
 		fmt.Println("start called")
 	},
+}
+
+func isfob() (ok bool) {
+	ora := time.Now()
+	giorno := ora.Weekday()
+
+	switch giorno {
+	//Se è sabato siamo in fob
+	case time.Saturday:
+		return true
+		//se è domenica siamo in fob
+	case time.Sunday:
+		return true
+		//se è un giorno feriale dobbiamo vedere l'orario
+	default:
+		//se è dopo le 18 e 30 siamo in fob
+		//fmt.Println("Giorno feriale")
+		if ora.Hour() > 18 && ora.Minute() > 30 {
+			return true
+		}
+		//se è prima delle 7 allora siamo in fob
+		if ora.Hour() < 7 {
+			return true
+		}
+	}
+	//in ogni altro caso siamo in ob
+	return false
 }
 
 func init() {
