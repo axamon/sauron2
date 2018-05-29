@@ -1,6 +1,8 @@
 author: Alberto Bregliano <alberto.bregliano@pm.me>
 license: MIT
-Version: 0.2
+Version: 0.3
 Reperibilita: ./reperibilita.csv
 twilioaccountsid: 
 twilioauthtoken:
+numservicedesk: 0636875015
+foborainizio: 16

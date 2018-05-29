@@ -126,7 +126,7 @@ var startCmd = &cobra.Command{
 							for m := 1; m < 10; m++ {
 								//TODO: Cambiare funzione e mettere una specifica per il servicedesk
 								fmt.Println("Chiamo il numero di escalation")
-								sid, err := reperibili.Chiamareperibile("NUMEEO", "UTENTE", "SERVICEDESK")
+								sid, err := reperibili.Chiamareperibile(viper.GetString("numservicedesk"), "UTENTE", "SERVICEDESK")
 								if err != nil {
 									fmt.Println("Errore", err.Error())
 								}
@@ -192,7 +192,7 @@ func isfob() (ok bool) {
 	default:
 		//se è dopo le 18 e 30 siamo in fob
 		//fmt.Println("Giorno feriale")
-		if ora.Hour() > 18 && ora.Minute() > 30 {
+		if ora.Hour() > viper.GetInt("foborainizio") && ora.Minute() > 30 {
 			return true
 		}
 		//se è prima delle 7 allora siamo in fob
