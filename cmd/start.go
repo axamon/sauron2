@@ -95,6 +95,10 @@ var startCmd = &cobra.Command{
 
 			//Se la linea è di notifica, la analizza, se no passa oltre
 			//notificabool := strings.Contains(line.Text, "NOTIFICATION")
+			//Se la linea non contiene reperibile inturno ricomincia da LINE
+			if !strings.Contains(line.Text, "reperibileinturno") {
+				continue LINE
+			}
 			switch {
 
 			case strings.Contains(line.Text, "NOTIFICATION") && strings.Contains(line.Text, "CRITICAL"):
