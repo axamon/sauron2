@@ -107,7 +107,7 @@ var startCmd = &cobra.Command{
 				//Cerca di chiamare il reperibile per 3 volte
 				//TODO: se il problema rientra smettere di chiamare
 				//Se non siamo in FOB non fare nulla
-				if ok := Isfob(); ok == false {
+				if ok := isfob(); ok == false {
 					fmt.Println("Siamo in orario base quindi niente notifiche")
 					continue LINE
 				}
@@ -188,7 +188,7 @@ var startCmd = &cobra.Command{
 	},
 }
 
-func Isfob() (ok bool) {
+func isfob() (ok bool) {
 	ora := time.Now()
 	giorno := ora.Weekday()
 	//Partiamo che non siamo in OB
