@@ -107,7 +107,7 @@ var startCmd = &cobra.Command{
 				//Cerca di chiamare il reperibile per 3 volte
 				//TODO: se il problema rientra smettere di chiamare
 				//Se non siamo in FOB non fare nulla
-				if ok := isfob(); ok == false {
+				if ok := Isfob(); ok == false {
 					fmt.Println("Siamo in orario base quindi niente notifiche")
 					continue LINE
 				}
@@ -188,7 +188,7 @@ var startCmd = &cobra.Command{
 	},
 }
 
-func isfob() (ok bool) {
+func Isfob() (ok bool) {
 	ora := time.Now()
 	giorno := ora.Weekday()
 	//Partiamo che non siamo in OB
@@ -206,7 +206,7 @@ func isfob() (ok bool) {
 		//se è un giorno feriale dobbiamo vedere l'orario
 	default:
 		//se è dopo le 18 e 30 siamo in fob
-		if ora.Hour() > viper.GetInt("foborainizio") {
+		if ora.Hour() >= viper.GetInt("foborainizio") {
 			//fmt.Println("Giorno feriale", viper.GetInt("foborainizio"))
 			ok = true
 		}

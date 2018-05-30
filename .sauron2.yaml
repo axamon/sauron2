@@ -1,10 +1,10 @@
 author: Alberto Bregliano <alberto.bregliano@pm.me>
 license: MIT
-Version: 0.3
+Version: 0.4
 Reperibilita: ./reperibilita.csv
-Nagioslogfile: 
+Nagioslogfile: /var/log/nagios/nagios.log
 twilioaccountsid: 
 twilioauthtoken:
 piattaforma: CDN
 numservicedesk: +390636875015
-foborainizio: 14
+foborainizio: 15
