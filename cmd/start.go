@@ -62,6 +62,10 @@ var startCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		if result := isfob(); result == true {
+			fmt.Println("Siamo in FOB, notifiche vocali attive!")
+		}
+
 		//Inizia il tail dalla fine del file leggendolo dalla fine
 		var fine tail.SeekInfo
 		fine.Offset = 0
