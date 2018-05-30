@@ -51,6 +51,17 @@ var startCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		//Recupera file dei log nagios dal file di congigurazione
+		nagioslog := viper.GetString("Nagioslogfile")
+
+		fmt.Println(nagioslog) //Debug
+
+		//Verifica se il file deli log nagios esiste e se è raggiungibile
+		if _, err := os.Stat(nagioslog); os.IsNotExist(err) {
+			fmt.Fprintln(os.Stderr, "Il file "+nagioslog+" non esiste oppure non accessibile")
+			os.Exit(1)
+		}
+
 		//Inizia il tail dalla fine del file leggendolo dalla fine
 		var fine tail.SeekInfo
 		fine.Offset = 0
