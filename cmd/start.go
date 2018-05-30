@@ -135,12 +135,12 @@ var startCmd = &cobra.Command{
 						status := cercasid.Retrievestatus(sid)
 						//se lo status è completed esce dal loop
 						if status == "completed" {
-							fmt.Println("Reperibile", NOME, COGNOME, "contattattato con successo al", TO, "alle", time.Now())
+							fmt.Println(time.Now().Format(time.RFC3339), "Reperibile", NOME, COGNOME, "contattattato con successo al", TO)
 							return
 						}
 						//se lo status è diverso da completed
 						//Bisogna scalare il problema
-						fmt.Println("ho provato", n, " volte e non sono riuscito a contattare il reperibile", NOME, COGNOME, TO, status)
+						fmt.Println(time.Now().Format(time.RFC3339), "ho provato", n, " volte e non sono riuscito a contattare il reperibile", NOME, COGNOME, TO, status)
 						if n == 4 {
 							for m := 1; m < 10; m++ {
 								//TODO: Cambiare funzione e mettere una specifica per il servicedesk
@@ -153,12 +153,12 @@ var startCmd = &cobra.Command{
 								time.Sleep(80 * time.Second)
 								status := cercasid.Retrievestatus(sid)
 								if status == "completed" {
-									fmt.Println("ServiceDesk contattattato con successo al alle", time.Now())
+									fmt.Println(time.Now().Format(time.RFC3339), "ServiceDesk contattattato con successo")
 									return
 								}
-								fmt.Println("SD non risponde tentativo", m, time.Now())
+								fmt.Println(time.Now().Format(time.RFC3339), "SD non risponde tentativo", m)
 							}
-							fmt.Println("Molto grave! Neanche il SD sono riuscito a chiamare!", time.Now())
+							fmt.Println(time.Now().Format(time.RFC3339), "Molto grave! Neanche il SD sono riuscito a chiamare!")
 							return
 						}
 
