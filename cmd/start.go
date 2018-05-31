@@ -40,6 +40,10 @@ var startCmd = &cobra.Command{
 	Se li riscontra allora contatta il reperibile in turno.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		if fob := isfob(); fob == true {
+			fmt.Println("Siamo in FOB. Notifiche vocali attive!")
+		}
+
 		//Recupera file reperibilita.csv dal file di congigurazione
 		reperibilita := viper.GetString("Reperibilita")
 
