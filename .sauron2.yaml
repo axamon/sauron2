@@ -7,5 +7,5 @@ Nagioslogfile: /var/log/nagios/nagios.log
 twilioaccountsid: 
 twilioauthtoken:
 piattaforma: CDN
-numservicedesk: +390636875015
+numservicedesk: "+390636875015"
 foborainizio: 15
