@@ -11,7 +11,7 @@
   branch = "master"
   name = "github.com/axamon/reperibili"
   packages = ["."]
-  revision = "774d33e9b329c32084e4b6a7158a1a5c24de5715"
+  revision = "fd6c872c5737d76856840e12e3cdfa3c9f11afe5"
 
 [[projects]]
   branch = "master"
