@@ -231,10 +231,10 @@ func init() {
 
 	//variabile che punta al file log di Nagios
 	//var nagioslog = flag.String("nagioslog", "/var/log/nagios/nagios.log", "Nagios file di log")
-	startCmd.PersistentFlags().StringVar(&nagioslog, "nagioslog", "/var/log/nagios/nagios.log", "Nagios file di log")
+	//startCmd.PersistentFlags().StringVar(&nagioslog, "nagioslog", "/var/log/nagios/nagios.log", "Nagios file di log")
 
 	//variabile per recuperare lo storage della reperibilità
-	startCmd.PersistentFlags().StringVar(&reperibilita, "reperibilita", "$GOPATH/src/github.com/axamon/sauron/sauron/reperibilita.csv", "Nagios file di log")
+	//startCmd.PersistentFlags().StringVar(&reperibilita, "reperibilita", "$GOPATH/src/github.com/axamon/sauron/sauron/reperibilita.csv", "Nagios file di log")
 
 	// Here you will define your flags and configuration settings.
 
