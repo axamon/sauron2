@@ -31,6 +31,10 @@ var testCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cellditest := viper.GetString("Cellpertest")
 
+		if ok := sms.Verificacellulare(cellditest); ok == false {
+			fmt.Printf("cellulare nel formato errato %s\n", cellditest)
+		}
+
 		messaggio := ("Notifiche vocali correttamente funzionanti")
 		result := sms.Inviasms(cellditest, messaggio)
 

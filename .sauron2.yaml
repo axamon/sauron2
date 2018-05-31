@@ -1,7 +1,7 @@
 author: Alberto Bregliano <alberto.bregliano@pm.me>
 license: MIT
 Version: 0.4
-Cellpertest: +393357201533
+Cellpertest: "+393357291533"
 Reperibilita: ./reperibilita.csv
 Nagioslogfile: /var/log/nagios/nagios.log
 twilioaccountsid: 
