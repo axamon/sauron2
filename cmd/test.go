@@ -26,17 +26,20 @@ import (
 var testCmd = &cobra.Command{
 	Use:   "test",
 	Short: "Invia sms di test",
-	Long:  `Per sincerarsi che le notifiche funzionino correttamente è possibile inviare un sms di test`,
+	Long: `Per sincerarsi che le notifiche funzionino cor
+	rettamente è possibile inviare un sms di test`,
 	Run: func(cmd *cobra.Command, args []string) {
+		cellditest := viper.GetString("Cellpertest")
+
+		messaggio := ("Notifiche vocali correttamente funzionanti")
+		result := sms.Inviasms(cellditest, messaggio)
+
+		fmt.Println(result)
 		fmt.Println("test called")
 	},
 }
 
 func init() {
-	cellditest := viper.GetString("Cellpertest")
-
-	messaggio := ("Notifiche vocali correttamente funzionanti")
-	sms.Inviasms(cellditest, messaggio)
 
 	rootCmd.AddCommand(testCmd)
 
