@@ -4,6 +4,7 @@ Version: v2.1.0-beta
 Cellpertest: "+393357291533"
 Reperibilita: ./reperibilita.csv
 Nagioslogfile: /var/log/nagios/nagios.log
+Nagiosuser: reperibileinturno
 twilioaccountsid: 
 twilioauthtoken:
 piattaforma: CDN

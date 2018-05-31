@@ -30,7 +30,7 @@ import (
 )
 
 //Crea variabile per assegnare i valori presi dal file di configurazione viper
-var nagioslog, reperibilita string
+var nagioslog, reperibilita, nagiosuser string
 
 // startCmd represents the start command
 var startCmd = &cobra.Command{
@@ -60,6 +60,9 @@ var startCmd = &cobra.Command{
 
 		fmt.Println(nagioslog) //Debug
 
+		//Recupera il nome dell'utente nagios di servizio per le notifiche
+		nagiosuser := viper.GetString("Nagiosuser")
+
 		//Verifica se il file deli log nagios esiste e se è raggiungibile
 		if _, err := os.Stat(nagioslog); os.IsNotExist(err) {
 			fmt.Fprintln(os.Stderr, "Il file "+nagioslog+" non esiste oppure non accessibile")
@@ -88,6 +91,7 @@ var startCmd = &cobra.Command{
 		//Se ci sono problemi ad accedere al file nagioslog esce.
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
+			//TODO: verificare che sia opportuno questo exit, fa spegnere sauron...
 			os.Exit(1)
 		}
 
@@ -97,33 +101,38 @@ var startCmd = &cobra.Command{
 
 			//fmt.Println(line.Text) //per debug
 
-			//Se la linea è di notifica, la analizza, se no passa oltre
-			//notificabool := strings.Contains(line.Text, "NOTIFICATION")
-			//Se la linea non contiene reperibile inturno ricomincia da LINE
-			if !strings.Contains(line.Text, "reperibileinturno") {
+			//Se la linea non contiene il nome dello user di nagios ricomincia da LINE
+			if !strings.Contains(line.Text, nagiosuser) {
 				continue LINE
 			}
+
 			switch {
 
+			//Se la linea è di notifica, la analizza, se no passa oltre
 			case strings.Contains(line.Text, "NOTIFICATION") && strings.Contains(line.Text, "CRITICAL"):
-				fmt.Println(line.Text)
-				//TODO cambiare CDN con qualcosa di variabile
-				reperibile, _ := reperibili.Reperibiliperpiattaforma2(viper.GetString("piattaforma"), reperibilita)
+				fmt.Println(line.Text) //debug
+
+				//recupera il reperibile odierno tenendo conta degli orari di reperibilità
+				reperibile, err := reperibili.Reperibiliperpiattaforma2(viper.GetString("piattaforma"), reperibilita)
+				if err != nil {
+					fmt.Fprintln(os.Stdout, err.Error())
+				}
 
 				TO := reperibile.Cellulare
 				NOME := reperibile.Nome
 				COGNOME := reperibile.Cognome
-				//debug
-				fmt.Println(TO, NOME, COGNOME)
 
-				//Cerca di chiamare il reperibile per 3 volte
-				//TODO: se il problema rientra smettere di chiamare
+				fmt.Println(TO, NOME, COGNOME) //debug
+
 				//Se non siamo in FOB non fare nulla
+				//L'ora di demarcazione del fob è impostabile nel file di configurazione
 				if ok := isfob(); ok == false {
 					fmt.Println("Siamo in orario base quindi niente notifiche")
 					continue LINE
 				}
 
+				//Cerca di chiamare il reperibile per tot volte
+				//TODO: se il problema rientra smettere di chiamare
 				go func() {
 					for n := 1; n < 5; n++ {
 						//chiamo per la n volta
@@ -133,11 +142,11 @@ var startCmd = &cobra.Command{
 							fmt.Println("Errore", err.Error())
 						}
 						fmt.Println(sid)
-						//attendi 60 secondi
+						//attendi 90 secondi
 						time.Sleep(90 * time.Second)
 						//e verifica lo  status del sid
 						status := cercasid.Retrievestatus(sid)
-						//se lo status è completed esce dal loop
+						//se lo status è completed esce dalla gooutine
 						if status == "completed" {
 							fmt.Println(time.Now().Format(time.RFC3339), "Reperibile", NOME, COGNOME, "contattattato con successo al", TO)
 							return
@@ -148,7 +157,7 @@ var startCmd = &cobra.Command{
 						if n == 4 {
 							for m := 1; m < 10; m++ {
 								//TODO: Cambiare funzione e mettere una specifica per il servicedesk
-								fmt.Println("Chiamo il numero di escalation")
+								fmt.Println(time.Now().Format(time.RFC3339), "Chiamo il numero di escalation")
 								sid, err := reperibili.Chiamareperibile(viper.GetString("numservicedesk"), "UTENTE", "SERVICEDESK")
 								if err != nil {
 									fmt.Println("Errore", err.Error())
@@ -156,12 +165,15 @@ var startCmd = &cobra.Command{
 								fmt.Println(sid)
 								time.Sleep(80 * time.Second)
 								status := cercasid.Retrievestatus(sid)
+								//se lo status è completed esce dalla gooutine
 								if status == "completed" {
 									fmt.Println(time.Now().Format(time.RFC3339), "ServiceDesk contattattato con successo")
 									return
 								}
 								fmt.Println(time.Now().Format(time.RFC3339), "SD non risponde tentativo", m)
 							}
+							//Esce dalla goroutine senza essere riuscito a chiamare il Servicedesk
+							//TODO: Verificare le politiche di escalation
 							fmt.Println(time.Now().Format(time.RFC3339), "Molto grave! Neanche il SD sono riuscito a chiamare!")
 							return
 						}
@@ -169,7 +181,9 @@ var startCmd = &cobra.Command{
 					}
 				}()
 
-				//esce dallo switch
+				//esce dallo switch e permette così di gestire nuove notifiche
+				//il che potrebbe essere un problema se arrivano molteplici notifiche per piattaforma
+				//Forse sarebbe oppotuno limitare il numero di chiamate a 1 per volta
 				break
 
 			case strings.Contains(line.Text, "NOTIFICATION") && strings.Contains(line.Text, "OK"):
@@ -211,13 +225,15 @@ func isfob() (ok bool) {
 	case time.Saturday:
 		//fmt.Println("E' sabato")
 		ok = true
-		//se è domenica siamo in fob
+	//Se è domenica siamo in fob
 	case time.Sunday:
 		//fmt.Println("E' Domenica")
 		ok = true
-		//se è un giorno feriale dobbiamo vedere l'orario
+	//Se invece è un giorno feriale dobbiamo vedere l'orario
 	default:
-		//se è dopo le 18 e 30 siamo in fob
+		//se è dopo le 18 siamo in fob
+		//Si avviso il reperibile mezz'ora prima se è un problema si può cambiare
+		//Recupero l'ora del FOB dal file di configurazione
 		if ora.Hour() >= viper.GetInt("foborainizio") {
 			//fmt.Println("Giorno feriale", viper.GetInt("foborainizio"))
 			ok = true
@@ -227,6 +243,7 @@ func isfob() (ok bool) {
 			ok = true
 		}
 	}
+	//Ritorna ok che sarà true o false a seconda se siamo in FOB o no
 	return ok
 }
 
