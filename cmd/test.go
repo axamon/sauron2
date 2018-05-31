@@ -17,25 +17,27 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/axamon/sms"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // testCmd represents the test command
 var testCmd = &cobra.Command{
 	Use:   "test",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Invia sms di test",
+	Long:  `Per sincerarsi che le notifiche funzionino correttamente è possibile inviare un sms di test`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("test called")
 	},
 }
 
 func init() {
+	cellditest := viper.GetString("Cellpertest")
+
+	messaggio := ("Notifiche vocali correttamente funzionanti")
+	sms.Inviasms(cellditest, messaggio)
+
 	rootCmd.AddCommand(testCmd)
 
 	// Here you will define your flags and configuration settings.
