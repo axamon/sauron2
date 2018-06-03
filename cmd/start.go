@@ -53,11 +53,19 @@ var startCmd = &cobra.Command{
 
 		fmt.Println(reperibilita) //Debug
 
+		//Recupera piattaforma dal file di congigurazione
+		piattaforma := viper.GetString("piattaforma")
+
+		fmt.Println(piattaforma) //Debug
+
 		//Verifica se il file della reperibilita esiste e se è raggiungibile
 		if _, err := os.Stat(reperibilita); os.IsNotExist(err) {
 			fmt.Fprintln(os.Stderr, "Il file "+reperibilita+" non esiste oppure non accessibile")
 			os.Exit(1)
 		}
+
+		//Verfica esistenza reperibile per oggi e domani
+		//TODO: creare sistema gestione reperibili serio
 
 		//Recupera file dei log nagios dal file di congigurazione
 		nagioslog := viper.GetString("Nagioslogfile")
