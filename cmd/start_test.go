@@ -18,6 +18,7 @@ func TestPrimo(t *testing.T) {
 		{Date: time.Date(2018, 6, 4, 6, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: true},
 		{Date: time.Date(2018, 6, 4, 6, 59, 0, 0, time.Local), OraInizioFob: 18, Fob: true},
 		{Date: time.Date(2018, 6, 4, 7, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: false},
+		{Date: time.Date(2018, 6, 4, 18, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: true},
 		{Date: time.Date(2018, 6, 3, 7, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: true},
 		{Date: time.Date(2018, 6, 2, 7, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: true},
 		{Date: time.Date(2018, 6, 4, 12, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: false},
