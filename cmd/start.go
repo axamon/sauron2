@@ -40,7 +40,11 @@ var startCmd = &cobra.Command{
 	Se li riscontra allora contatta il reperibile in turno.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if fob := isfob(time.Now()); fob == true {
+		//Recupera ora inzio fob dal file di congigurazione
+		foborainizio := viper.GetInt("foborainizio")
+		fmt.Printf("Ora inzio FOB: %d", foborainizio)
+
+		if fob := isfob(time.Now(), foborainizio); fob == true {
 			fmt.Println("Siamo in FOB. Notifiche vocali attive!")
 		}
 
@@ -69,7 +73,7 @@ var startCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if result := isfob(time.Now()); result == true {
+		if result := isfob(time.Now(), foborainizio); result == true {
 			fmt.Println("Siamo in FOB, notifiche vocali attive!")
 		}
 
@@ -126,7 +130,7 @@ var startCmd = &cobra.Command{
 
 				//Se non siamo in FOB non fare nulla
 				//L'ora di demarcazione del fob è impostabile nel file di configurazione
-				if ok := isfob(time.Now()); ok == false {
+				if ok := isfob(time.Now(), foborainizio); ok == false {
 					fmt.Println("Siamo in orario base quindi niente notifiche")
 					continue LINE
 				}
@@ -214,7 +218,7 @@ var startCmd = &cobra.Command{
 	},
 }
 
-func isfob(ora time.Time) (ok bool) {
+func isfob(ora time.Time, foborainizio int) (ok bool) {
 	//ora := time.Now()
 	giorno := ora.Weekday()
 	//Partiamo che non siamo in FOB
@@ -234,9 +238,11 @@ func isfob(ora time.Time) (ok bool) {
 		//se è dopo le 18 siamo in fob
 		//Si avviso il reperibile mezz'ora prima se è un problema si può cambiare
 		//Recupero l'ora del FOB dal file di configurazione
-		if ora.Hour() >= viper.GetInt("foborainizio") {
+
+		if ora.Hour() >= foborainizio {
 			//fmt.Println("Giorno feriale", viper.GetInt("foborainizio"))
 			ok = true
+			return ok
 		}
 		//se è prima delle 7 allora siamo in fob
 		if ora.Hour() < 7 {
