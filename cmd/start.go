@@ -40,7 +40,7 @@ var startCmd = &cobra.Command{
 	Se li riscontra allora contatta il reperibile in turno.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if fob := isfob(); fob == true {
+		if fob := isfob(time.Now()); fob == true {
 			fmt.Println("Siamo in FOB. Notifiche vocali attive!")
 		}
 
@@ -69,7 +69,7 @@ var startCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if result := isfob(); result == true {
+		if result := isfob(time.Now()); result == true {
 			fmt.Println("Siamo in FOB, notifiche vocali attive!")
 		}
 
@@ -126,7 +126,7 @@ var startCmd = &cobra.Command{
 
 				//Se non siamo in FOB non fare nulla
 				//L'ora di demarcazione del fob è impostabile nel file di configurazione
-				if ok := isfob(); ok == false {
+				if ok := isfob(time.Now()); ok == false {
 					fmt.Println("Siamo in orario base quindi niente notifiche")
 					continue LINE
 				}
@@ -214,10 +214,10 @@ var startCmd = &cobra.Command{
 	},
 }
 
-func isfob() (ok bool) {
-	ora := time.Now()
+func isfob(ora time.Time) (ok bool) {
+	//ora := time.Now()
 	giorno := ora.Weekday()
-	//Partiamo che non siamo in OB
+	//Partiamo che non siamo in FOB
 	ok = false
 
 	switch giorno {
