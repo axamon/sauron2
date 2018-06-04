@@ -42,6 +42,10 @@ var startCmd = &cobra.Command{
 
 		//Recupera ora inzio fob dal file di congigurazione
 		foborainizio := viper.GetInt("foborainizio")
+		if foborainizio == 0 {
+			fmt.Fprintln(os.Stderr, "errore foborarioinizio è zero")
+			os.Exit(1)
+		}
 		fmt.Fprintln(os.Stdout, "Ora inzio FOB:", foborainizio)
 
 		if fob := isfob(time.Now(), foborainizio); fob == true {
