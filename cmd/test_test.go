@@ -21,7 +21,8 @@ func TestTest(t *testing.T) {
 	}
 	for _, cellulare := range numeri {
 		if ok := sms.Verificacellulare(cellulare.Numcell); ok != cellulare.Valido {
-			t.Error("Formato cellulare non valido")
+			t.Error("Formato cellulare non valido", cellulare.Numcell)
 		}
 	}
+
 }
