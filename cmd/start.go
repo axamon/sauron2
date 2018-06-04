@@ -74,6 +74,10 @@ var startCmd = &cobra.Command{
 
 		//Recupera il nome dell'utente nagios di servizio per le notifiche
 		nagiosuser := viper.GetString("Nagiosuser")
+		if len(nagioslog) == 0 {
+			fmt.Fprintln(os.Stderr, "User per nagios non presente", nagiosuser)
+			os.Exit(1)
+		}
 
 		fmt.Println("Le notifiche inoltrate saranno quelle per l'utente", nagiosuser)
 
