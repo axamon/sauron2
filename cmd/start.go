@@ -75,6 +75,8 @@ var startCmd = &cobra.Command{
 		//Recupera il nome dell'utente nagios di servizio per le notifiche
 		nagiosuser := viper.GetString("Nagiosuser")
 
+		fmt.Println("Le notifiche inoltrate saranno quelle per l'utente", nagiosuser)
+
 		//Verifica se il file deli log nagios esiste e se è raggiungibile
 		if _, err := os.Stat(nagioslog); os.IsNotExist(err) {
 			fmt.Fprintln(os.Stderr, "Il file "+nagioslog+" non esiste oppure non accessibile")
