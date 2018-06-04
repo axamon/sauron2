@@ -16,6 +16,9 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"time"
 
 	"github.com/axamon/sms"
 	"github.com/spf13/cobra"
@@ -33,6 +36,20 @@ var testCmd = &cobra.Command{
 
 		if ok := sms.Verificacellulare(cellditest); ok == false {
 			fmt.Printf("cellulare nel formato errato %s\n", cellditest)
+		}
+
+		timeout := time.Duration(10 * time.Second)
+		client := http.Client{
+			Timeout: timeout,
+		}
+		resp, err := client.Get("http://google.com")
+		if err != nil {
+			fmt.Fprintln(os.Stdout, "errore nel contattare internet", err.Error())
+			os.Exit(1)
+		}
+
+		if httpstatus := resp.StatusCode; httpstatus > 399 {
+			fmt.Fprintln(os.Stdout, "errore httpstatus: ", httpstatus)
 		}
 
 		messaggio := ("Notifiche vocali correttamente funzionanti")

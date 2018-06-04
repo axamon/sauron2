@@ -36,7 +36,7 @@ var nagioslog, reperibilita, nagiosuser string
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Avvia le notifiche a voce per il reperibile in turno",
-	Long: `Saurno2 ascolta in tail sul file di nagios per pattern specifici
+	Long: `Sauron2 ascolta in tail sul file di nagios per pattern specifici
 	Se li riscontra allora contatta il reperibile in turno.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
