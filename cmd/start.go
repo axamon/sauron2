@@ -35,14 +35,14 @@ var nagioslog, reperibilita, nagiosuser string
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Sauron2 notifica a voce il reperibile in turno",
+	Short: "Avvia le notifiche a voce per il reperibile in turno",
 	Long: `Saurno2 ascolta in tail sul file di nagios per pattern specifici
 	Se li riscontra allora contatta il reperibile in turno.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Recupera ora inzio fob dal file di congigurazione
 		foborainizio := viper.GetInt("foborainizio")
-		fmt.Printf("Ora inzio FOB: %d", foborainizio)
+		fmt.Printf("Ora inzio FOB: %d\n", foborainizio)
 
 		if fob := isfob(time.Now(), foborainizio); fob == true {
 			fmt.Println("Siamo in FOB. Notifiche vocali attive!")
@@ -53,11 +53,19 @@ var startCmd = &cobra.Command{
 
 		fmt.Println(reperibilita) //Debug
 
+		//Recupera piattaforma dal file di congigurazione
+		piattaforma := viper.GetString("piattaforma")
+
+		fmt.Println(piattaforma) //Debug
+
 		//Verifica se il file della reperibilita esiste e se è raggiungibile
 		if _, err := os.Stat(reperibilita); os.IsNotExist(err) {
 			fmt.Fprintln(os.Stderr, "Il file "+reperibilita+" non esiste oppure non accessibile")
 			os.Exit(1)
 		}
+
+		//Verfica esistenza reperibile per oggi e domani
+		//TODO: creare sistema gestione reperibili serio
 
 		//Recupera file dei log nagios dal file di congigurazione
 		nagioslog := viper.GetString("Nagioslogfile")
@@ -71,10 +79,6 @@ var startCmd = &cobra.Command{
 		if _, err := os.Stat(nagioslog); os.IsNotExist(err) {
 			fmt.Fprintln(os.Stderr, "Il file "+nagioslog+" non esiste oppure non accessibile")
 			os.Exit(1)
-		}
-
-		if result := isfob(time.Now(), foborainizio); result == true {
-			fmt.Println("Siamo in FOB, notifiche vocali attive!")
 		}
 
 		//Inizia il tail dalla fine del file leggendolo dalla fine
