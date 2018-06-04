@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/axamon/sauron2)](https://goreportcard.com/report/github.com/axamon/sauron2)
 [![codecov](https://codecov.io/gh/axamon/sauron2/branch/master/graph/badge.svg)](https://codecov.io/gh/axamon/sauron2)
 [![cover.run](https://cover.run/go/https:/github.com/axamon/sauron2.svg?style=flat&tag=golang-1.10)](https://cover.run/go?tag=golang-1.10&repo=https%3A%2Fgithub.com%2Faxamon%2Fsauron2)
-[![Github Acquired by Microsoft]https://upload.wikimedia.org/wikipedia/commons/c/cd/Black_ribbon_top_left.png](https://upload.wikimedia.org/wikipedia/commons/c/cd/Black_ribbon_top_left.png)
+[![Github Acquired by Microsoft]https://upload.wikimedia.org/wikipedia/commons/c/cd/Black_ribbon_top_left.png](https://commons.wikimedia.org/wiki/File:Black_Ribbon.svg)
 
 Sauron2 allows to trigger voice calls based on nagios logs using Twilio APIs.
 
