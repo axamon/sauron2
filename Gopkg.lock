@@ -14,12 +14,6 @@
   revision = "5aa49521cc5a17011b439fe8b09ab474a7801353"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/axamon/sauron"
-  packages = ["cercasid"]
-  revision = "04395840d2858740f0eb5c36b47dca2b8c46859a"
-
-[[projects]]
   name = "github.com/axamon/sms"
   packages = ["."]
   revision = "813d6679a53f4b6f94ffe890129592cf8afae37a"
@@ -168,6 +162,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dcf5d61abe18d6602549db771accb4274de8165f7a9e67ac14c5120d3517f7b5"
+  inputs-digest = "2949935db46ccc3ffd7437aaa192ce3dfe44a77048795e631b0b78be6f1829dc"
   solver-name = "gps-cdcl"
   solver-version = 1
