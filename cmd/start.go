@@ -42,7 +42,7 @@ var startCmd = &cobra.Command{
 
 		//Recupera ora inzio fob dal file di congigurazione
 		foborainizio := viper.GetInt("foborainizio")
-		fmt.Printf("Ora inzio FOB: %d\n", foborainizio)
+		fmt.Fprintln(os.Stdout, "Ora inzio FOB:", foborainizio)
 
 		if fob := isfob(time.Now(), foborainizio); fob == true {
 			fmt.Println("Siamo in FOB. Notifiche vocali attive!")
@@ -70,7 +70,7 @@ var startCmd = &cobra.Command{
 		//Recupera file dei log nagios dal file di congigurazione
 		nagioslog := viper.GetString("Nagioslogfile")
 
-		fmt.Println(nagioslog) //Debug
+		fmt.Fprintln(os.Stdout, nagioslog) //Debug
 
 		//Recupera il nome dell'utente nagios di servizio per le notifiche
 		nagiosuser := viper.GetString("Nagiosuser")
