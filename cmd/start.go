@@ -42,7 +42,7 @@ var startCmd = &cobra.Command{
 
 		//Recupera ora inzio fob dal file di congigurazione
 		foborainizio := viper.GetInt("foborainizio")
-		fmt.Printf("Ora inzio FOB: %d", foborainizio)
+		fmt.Printf("Ora inzio FOB: %d\n", foborainizio)
 
 		if fob := isfob(time.Now(), foborainizio); fob == true {
 			fmt.Println("Siamo in FOB. Notifiche vocali attive!")
@@ -79,10 +79,6 @@ var startCmd = &cobra.Command{
 		if _, err := os.Stat(nagioslog); os.IsNotExist(err) {
 			fmt.Fprintln(os.Stderr, "Il file "+nagioslog+" non esiste oppure non accessibile")
 			os.Exit(1)
-		}
-
-		if result := isfob(time.Now(), foborainizio); result == true {
-			fmt.Println("Siamo in FOB, notifiche vocali attive!")
 		}
 
 		//Inizia il tail dalla fine del file leggendolo dalla fine
