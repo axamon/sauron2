@@ -18,12 +18,9 @@ func TestPrimo(t *testing.T) {
 		{Date: time.Date(2018, 6, 4, 6, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: true},
 		{Date: time.Date(2018, 6, 4, 6, 59, 0, 0, time.Local), OraInizioFob: 18, Fob: true},
 		{Date: time.Date(2018, 6, 4, 7, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: false},
-<<<<<<< HEAD
-=======
 		{Date: time.Date(2018, 6, 4, 18, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: true},
 		{Date: time.Date(2018, 6, 3, 7, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: true},
 		{Date: time.Date(2018, 6, 2, 7, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: true},
->>>>>>> ec25562d4e4df6d47c23d987f2b5e1290bb0f097
 		{Date: time.Date(2018, 6, 4, 12, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: false},
 		{Date: time.Date(2018, 6, 4, 18, 30, 0, 0, time.Local), OraInizioFob: 18, Fob: true},
 		{Date: time.Date(2018, 6, 4, 18, 0, 0, 0, time.Local), OraInizioFob: 18, Fob: true},
