@@ -103,14 +103,51 @@ func InitDB(filepath string) *sql.DB {
 func main() {
 	db := InitDB(dbfile)
 	defer db.Close()
-	id := retrieveid("Bregliano")
+	id := repID("Bregliano")
 	fmt.Println(id)
-	id = retrieveid("Gasponi")
+	id = repID("Gasponi")
 	fmt.Println(id)
+	id, err := isRepSet("20180606")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt.Println(id)
+	setRep("20180606", "Bregliano")
 
 }
 
-func retrieveid(cognome string) (id int) {
+func setRep(giorno, cognome string) (ok bool, err error) {
+	db, err := sql.Open("sqlite3", dbfile)
+	checkErr(err)
+	defer db.Close()
+	repID := repID(cognome)
+	settaRep, err := db.Prepare("insert into assegnazione (giorno, reperibile_id) values(?,?)")
+	checkErr(err)
+	_, err = settaRep.Exec(giorno, repID)
+	if err != nil {
+		return false, fmt.Errorf("Errore %v", err.Error())
+	}
+	return true, nil
+
+}
+
+func isRepSet(giorno string) (reperibileID int, err error) {
+	db, err := sql.Open("sqlite3", dbfile)
+	checkErr(err)
+	defer db.Close()
+	cercagiorno, err := db.Prepare("select reperibile_id from assegnazione where giorno = ?")
+	if err != nil {
+		return -1, fmt.Errorf("errore: %v", err.Error())
+	}
+	row := cercagiorno.QueryRow(giorno)
+	err = row.Scan(&reperibileID)
+	if err != nil {
+		return -1, fmt.Errorf("errore: %v", err.Error())
+	}
+	return reperibileID, nil
+}
+
+func repID(cognome string) (id int) {
 	db, err := sql.Open("sqlite3", dbfile)
 	checkErr(err)
 	defer db.Close()
