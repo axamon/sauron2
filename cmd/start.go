@@ -24,7 +24,7 @@ import (
 
 	"github.com/axamon/reperibili"
 	"github.com/axamon/sauron2/cercasid"
-	"github.com/axamon/sms"
+	"github.com/axamon/sauron2/sms"
 	"github.com/hpcloud/tail"
 	"github.com/spf13/cobra"
 )

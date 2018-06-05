@@ -14,12 +14,6 @@
   revision = "5aa49521cc5a17011b439fe8b09ab474a7801353"
 
 [[projects]]
-  name = "github.com/axamon/sms"
-  packages = ["."]
-  revision = "813d6679a53f4b6f94ffe890129592cf8afae37a"
-  version = "v1.4.1-beta"
-
-[[projects]]
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
@@ -162,6 +156,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2949935db46ccc3ffd7437aaa192ce3dfe44a77048795e631b0b78be6f1829dc"
+  inputs-digest = "7a5cbc58866a98a05ff38ab58bdde32dc52a9aa9cbd00006e2e59a2b720b221b"
   solver-name = "gps-cdcl"
   solver-version = 1
