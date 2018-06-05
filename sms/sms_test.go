@@ -1,12 +1,10 @@
-package cmd
+package sms
 
 import (
 	"testing"
-
-	"github.com/axamon/sauron2/sms"
 )
 
-func TestTest(t *testing.T) {
+func TestVerificacellulare(t *testing.T) {
 	type formati []struct {
 		Numcell string
 		Valido  bool
@@ -20,9 +18,8 @@ func TestTest(t *testing.T) {
 		{Numcell: "+393353458144", Valido: true},
 	}
 	for _, cellulare := range numeri {
-		if ok := sms.Verificacellulare(cellulare.Numcell); ok != cellulare.Valido {
+		if ok := Verificacellulare(cellulare.Numcell); ok != cellulare.Valido {
 			t.Error("Formato cellulare non valido", cellulare.Numcell)
 		}
 	}
-
 }

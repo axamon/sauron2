@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/csv"
 	"encoding/json"
-	"encoding/xml"
 	"flag"
 	"fmt"
 	"io"
@@ -13,7 +12,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -125,13 +123,13 @@ func Reperibiliperpiattaforma2(piatta, file string) (contatto Reperibile, err er
 	return contatto, fmt.Errorf("%s", "Nessun reperibile trovato")
 }
 
-//Verificacellulare risponde ok se il numero inzia con +3 e si compone di 10 cifre
+/* //Verificacellulare risponde ok se il numero inzia con +39 e si compone di 10 cifre
 func Verificacellulare(CELLULARE string) (ok bool) {
 
 	re := regexp.MustCompile(`^\+39[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$`)
 	return re.MatchString(CELLULARE)
 
-}
+} */
 
 //Inseriscireperibile inserisce una nuova reperibilità
 func Inseriscireperibile(GIORNO, PIATTAFORMA, GRUPPO, NOME, COGNOME, CELLULARE string) (ok bool) {
@@ -144,10 +142,10 @@ func Inseriscireperibile(GIORNO, PIATTAFORMA, GRUPPO, NOME, COGNOME, CELLULARE s
 	if GIORNOINT < oggiint {
 		log.Fatal("vabbè mo mettemo le reperibilità nel passato")
 	}
-
-	if Verificacellulare(CELLULARE) == false {
-		log.Fatal("numero di cellulare non supportato, deve essere del tipo +39xxxxxxxxxx")
-	}
+	/*
+		if Verificacellulare(CELLULARE) == false {
+			log.Fatal("numero di cellulare non supportato, deve essere del tipo +39xxxxxxxxxx")
+		} */
 
 	value := []string{GIORNO, PIATTAFORMA, GRUPPO, NOME, COGNOME, CELLULARE}
 
@@ -325,49 +323,4 @@ func Chiamareperibile(TO, NOME, COGNOME string) (sid string, err error) {
 	//Se nella risposta non c'è indicazione del sid ritorna un errore
 	return "", fmt.Errorf("Sid non presente, problemi di auteticazione forse")
 
-}
-
-//Retrievestatus trova lo status di una call
-func Retrievestatus(sid string) (status string) {
-
-	accountSid, err := recuperavariabile("TWILIOACCOUNTSID")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(101)
-	}
-
-	url := "https://api.twilio.com/2010-04-01/Accounts/" + accountSid + "/Calls/" + sid
-
-	req, _ := http.NewRequest("GET", url, nil)
-
-	req.Header.Add("Authorization", "Basic QUM2MTU1NWQ2NDYyODE2NjAxMWM4YzU3NzZhM2JlOTU3ZTo1NDliNGRjOTQ5NmQ3MDg1YTA1M2FkZjQwNzBhOWFkYQ==")
-	req.Header.Add("Cache-Control", "no-cache")
-	req.Header.Add("Postman-Token", "decb8b3e-3689-4de0-bba9-d84c74fd0bf7")
-
-	res, errres := http.DefaultClient.Do(req)
-	if errres != nil {
-		log.Fatal(errres)
-	}
-
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
-
-	//fmt.Println(res)
-	//fmt.Println(string(body))
-
-	//Creo tipo per estrarre singolo valore da file XML
-	type TwilioResponse struct {
-		Status string `xml:"Call>Status"`
-	}
-
-	v := TwilioResponse{}
-	errstat := xml.Unmarshal(body, &v)
-	if errstat != nil {
-		fmt.Printf("error: %v", err)
-		return
-	}
-
-	//fmt.Printf("Status: %s\n", v.Status)
-
-	return v.Status
 }

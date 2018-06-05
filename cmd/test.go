@@ -20,7 +20,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/axamon/sms"
+	"github.com/axamon/sauron2/sms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
