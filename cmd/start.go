@@ -154,7 +154,10 @@ var startCmd = &cobra.Command{
 						//attendi 90 secondi
 						time.Sleep(90 * time.Second)
 						//e verifica lo  status del sid
-						status := cercasid.Retrievestatus(sid)
+						status, err := cercasid.Retrievestatus(sid)
+						if err != nil {
+							fmt.Println(time.Now().Format(time.RFC3339), err.Error())
+						}
 						//se lo status è completed esce dalla gooutine
 						if status == "completed" {
 							fmt.Println(time.Now().Format(time.RFC3339), "Reperibile", NOME, COGNOME, "contattattato con successo al", TO)
@@ -173,7 +176,10 @@ var startCmd = &cobra.Command{
 								}
 								fmt.Println(sid)
 								time.Sleep(80 * time.Second)
-								status := cercasid.Retrievestatus(sid)
+								status, err := cercasid.Retrievestatus(sid)
+								if err != nil {
+									fmt.Println(time.Now().Format(time.RFC3339), err.Error())
+								}
 								//se lo status è completed esce dalla gooutine
 								if status == "completed" {
 									fmt.Println(time.Now().Format(time.RFC3339), "ServiceDesk contattattato con successo")
