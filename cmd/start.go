@@ -42,7 +42,11 @@ var startCmd = &cobra.Command{
 
 		//Recupera ora inzio fob dal file di congigurazione
 		foborainizio := viper.GetInt("foborainizio")
-		fmt.Printf("Ora inzio FOB: %d\n", foborainizio)
+		if foborainizio == 0 {
+			fmt.Fprintln(os.Stderr, "errore foborarioinizio è zero")
+			os.Exit(1)
+		}
+		fmt.Fprintln(os.Stdout, "Ora inzio FOB:", foborainizio)
 
 		if fob := isfob(time.Now(), foborainizio); fob == true {
 			fmt.Println("Siamo in FOB. Notifiche vocali attive!")
@@ -70,10 +74,16 @@ var startCmd = &cobra.Command{
 		//Recupera file dei log nagios dal file di congigurazione
 		nagioslog := viper.GetString("Nagioslogfile")
 
-		fmt.Println(nagioslog) //Debug
+		fmt.Fprintln(os.Stdout, nagioslog) //Debug
 
 		//Recupera il nome dell'utente nagios di servizio per le notifiche
 		nagiosuser := viper.GetString("Nagiosuser")
+		if len(nagioslog) == 0 {
+			fmt.Fprintln(os.Stderr, "User per nagios non presente", nagiosuser)
+			os.Exit(1)
+		}
+
+		fmt.Println("Le notifiche inoltrate saranno quelle per l'utente", nagiosuser)
 
 		//Verifica se il file deli log nagios esiste e se è raggiungibile
 		if _, err := os.Stat(nagioslog); os.IsNotExist(err) {
