@@ -8,12 +8,6 @@
   revision = "2f2ce6251dfaefc53dd9fe11c55b29c67f0542a5"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/axamon/reperibili"
-  packages = ["."]
-  revision = "5aa49521cc5a17011b439fe8b09ab474a7801353"
-
-[[projects]]
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
@@ -156,6 +150,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7a5cbc58866a98a05ff38ab58bdde32dc52a9aa9cbd00006e2e59a2b720b221b"
+  inputs-digest = "5cb6f2b34dd3270b450e8e2c13c8d4416bc6686f5a8208da59a820dbc8e0d1e8"
   solver-name = "gps-cdcl"
   solver-version = 1

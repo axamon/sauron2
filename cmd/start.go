@@ -22,8 +22,8 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/axamon/reperibili"
 	"github.com/axamon/sauron2/cercasid"
+	"github.com/axamon/sauron2/reperibili"
 	"github.com/axamon/sauron2/sms"
 	"github.com/hpcloud/tail"
 	"github.com/spf13/cobra"
