@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 )
@@ -17,7 +16,7 @@ func recuperavariabile(variabile string) (result string, err error) {
 }
 
 //Retrievestatus trova lo status di una call
-func Retrievestatus(sid string) (status string) {
+func Retrievestatus(sid string) (status string, err error) {
 	/*
 		//Recupera il numero da usare con twilio
 		twilionumber, err := recuperavariabile("TWILIONUMBER")
@@ -47,7 +46,8 @@ func Retrievestatus(sid string) (status string) {
 
 	res, errres := http.DefaultClient.Do(req)
 	if errres != nil {
-		log.Fatal(errres)
+		//log.Fatal(errres)
+		return "", fmt.Errorf("Errore nella http richiesta %v", errres)
 	}
 
 	defer res.Body.Close()
@@ -64,11 +64,11 @@ func Retrievestatus(sid string) (status string) {
 	v := TwilioResponse{}
 	errstat := xml.Unmarshal(body, &v)
 	if errstat != nil {
-		fmt.Printf("error: %v", err)
-		return
+		//fmt.Printf("error: %v", err)
+		return "", fmt.Errorf("Problema con unmarshalling twilioresponse %v", errstat)
 	}
 
 	//fmt.Printf("Status: %s\n", v.Status)
 
-	return v.Status
+	return v.Status, nil
 }
