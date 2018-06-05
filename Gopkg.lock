@@ -137,9 +137,10 @@
   version = "v1.4.7"
 
 [[projects]]
+  branch = "v1"
   name = "gopkg.in/tomb.v1"
   packages = ["."]
-  revision = "c131134a1947e9afd9cecfe11f4c6dff0732ae58"
+  revision = "dd632973f1e7218eb1089048e0798ec9ae7dceb8"
 
 [[projects]]
   name = "gopkg.in/yaml.v2"
