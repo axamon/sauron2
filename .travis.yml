@@ -7,9 +7,13 @@ go:
 before_install:
   - go get -t -v ./...
 
+
+install:
+  - go get -u github.com/dave/courtney
+  - go get -t -v ./...
+  
 script:
-  - go test -race -coverprofile=coverage.txt -covermode=atomic
-  - ./gotests.sh
+  - courtney
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
