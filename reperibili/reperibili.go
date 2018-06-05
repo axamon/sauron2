@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/axamon/cripta"
+	"github.com/axamon/sauron2/sms"
 )
 
 const (
@@ -51,6 +52,66 @@ var filecsv = flag.String("f", "reperibilita.csv", "Percorso del file csv per la
 var piattaforma = flag.String("p", "CDN", "La piattaforma di cui desideri ricavare il reperibile")
 
 var contatti []Reperibile
+
+//VerificaPresenzaReperibili verifica che ci sia almeno una settimana di reperibilità scritta
+func VerificaPresenzaReperibili(piatta, file string) (ok bool, err error) {
+	//deve verificare che ci sia un reperibile con numero di cellulare corretto per tutti almeno una settimana da oggi
+	oggi := time.Now().Format("20060102")
+	oggiint, err := strconv.Atoi(oggi)
+	if err != nil {
+		fmt.Println(time.Now().Format(time.RFC3339), err.Error())
+	}
+
+	//Carica tutte le info
+	csvFile, err := os.Open(file)
+	if err != nil {
+		fmt.Println(time.Now().Format(time.RFC3339), err.Error())
+	}
+	defer csvFile.Close()
+	reader := csv.NewReader(bufio.NewReader(csvFile))
+	//TODO Viene ricreato contatti da zero è corretto?
+	var contatti []Reperibile
+
+	//Cicla le linee del file una per volta
+	for {
+		line, error := reader.Read()
+		//Finchè non arriva alla fine del file
+		if error == io.EOF {
+			//esce dal ciclo for
+			break
+			//Se ci sono problemi esce
+			//TODO magari conviene mettere un errore su stderr
+		} else if error != nil {
+			log.Fatal(error)
+		}
+		//Aggiunge le linee del file nella slice contatti
+		contatti = append(contatti, Reperibile{
+
+			Nome:      line[3],
+			Cognome:   line[4],
+			Cellulare: line[5],
+			Assegnazione: Assegnazione{
+				Giorno:      line[0],
+				Piattaforma: line[1],
+				Gruppo:      line[2],
+			},
+		})
+	}
+
+	for n := oggiint; n <= 7; n++ {
+		fmt.Println(n)
+		for _, contatto := range contatti {
+			if contatto.Assegnazione.Giorno == string(oggiint) && contatto.Assegnazione.Piattaforma == piatta {
+				if ok := sms.Verificacellulare(contatto.Cellulare); ok == true {
+					continue
+				} else {
+					return false, fmt.Errorf("problema con giorno %d", oggiint)
+				}
+			}
+		}
+	}
+	return true, nil
+}
 
 //Reperibiliperpiattaforma2 ti da le info
 func Reperibiliperpiattaforma2(piatta, file string) (contatto Reperibile, err error) {
