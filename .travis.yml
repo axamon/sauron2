@@ -4,13 +4,11 @@ go:
   - 1.10.x
   - tip
 
-before_install:
+install:
+  - go get -u github.com/mattn/goveralls
+  - go get -u github.com/dave/courtney
   - go get -t -v ./...
-
 script:
-  - go test -race -coverprofile=coverage.txt -covermode=atomic
-  - ./gotests.sh
-  
-
+  - courtney
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - goveralls -coverprofile=coverage.out -service=travis-ci
