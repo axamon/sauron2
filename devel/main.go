@@ -77,6 +77,7 @@ const (
 
 var db *sql.DB
 
+//InitDB inzializza il database e restituisce la risorsa
 func InitDB(filepath string) *sql.DB {
 	db, err := sql.Open("sqlite3", filepath)
 	if err != nil {
