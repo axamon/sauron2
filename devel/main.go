@@ -101,9 +101,9 @@ func InitDB(filepath string) *sql.DB {
 func main() {
 	db := InitDB(dbfile)
 	defer db.Close()
-	id, err := idRep("Bregliano")
+	id, _, err := idRep("Bregliano")
 	fmt.Println(id)
-	id, err = idRep("Gasponi")
+	id, _, err = idRep("Gasponi")
 	fmt.Println(id)
 	_, id, err = isRepSet("20180606")
 	if err != nil {
@@ -125,27 +125,32 @@ func addRep(nome, cognome, cellulare string) (ok bool, err error) {
 		return false, fmt.Errorf("Problema ad aprire il DB %s", err.Error())
 	}
 	defer db.Close()
-	verificaprimachenonesistagia, err := db.Prepare("select count(*) from reperibile where nome = ? and cognome = ? and cellulare = ?")
+	verificaprimachenonesistagia, err := db.Prepare("select id from reperibile where cellulare = ?")
 	if err != nil {
 		//fmt.Println(err.Error())
 		return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
 	}
-	addreperibile, err := db.Prepare("INSERT INTO reperibile (nome, cognome, cellulare) VALUES (?, ?,?)")
-	if err != nil {
-		//fmt.Println(err.Error())
-		return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
-	}
-	var exist bool
-	row := verificaprimachenonesistagia.QueryRow(nome, cognome, cellulare)
-	errrow := row.Scan(&exist)
-	if errrow != sql.ErrNoRows {
+
+	var exist interface{}
+	errow := verificaprimachenonesistagia.QueryRow(cellulare).Scan(exist)
+
+	switch {
+	case errow == sql.ErrNoRows:
+		addreperibile, err := db.Prepare("INSERT INTO reperibile (nome, cognome, cellulare) VALUES (?, ?,?)")
+		if err != nil {
+			//fmt.Println(err.Error())
+			return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
+		}
+		_, erraddrep := addreperibile.Exec(nome, cognome, cellulare)
+		if erraddrep != nil {
+			return false, fmt.Errorf("Impossibile inserire reperibile %s", err.Error())
+		}
+		return true, nil
+
+	default:
 		return false, fmt.Errorf("Impossibile inserire reperibile %s", err.Error())
 	}
-	_, erraddrep := addreperibile.Exec(nome, cognome, cellulare)
-	if erraddrep != nil {
-		return false, fmt.Errorf("Impossibile inserire reperibile %s", err.Error())
-	}
-	return true, nil
+
 }
 
 //setRep assegna un reperibile al giorno
@@ -156,7 +161,7 @@ func setRep(giorno, cognome string) (ok bool, err error) {
 		return false, fmt.Errorf("Problema ad aprire il DB %s", err.Error())
 	}
 	defer db.Close()
-	idrep, err := idRep(cognome)
+	idrep, _, err := idRep(cognome)
 	if err != nil {
 		//fmt.Println(err.Error())
 		return false, fmt.Errorf("Id reperibile non trovato %s", err.Error())
@@ -179,7 +184,7 @@ func isRepSet(giorno string) (ok bool, reperibileID int, err error) {
 	db, err := sql.Open("sqlite3", dbfile)
 	if err != nil {
 		//fmt.Println(err.Error())
-		return false, -1, fmt.Errorf("Id reperibile non trovato %s", err.Error())
+		return false, -1, fmt.Errorf("Problema ad aprire il DB %s", err.Error())
 	}
 	defer db.Close()
 	cercagiorno, err := db.Prepare("select reperibile_id from assegnazione where giorno = ?")
@@ -218,24 +223,53 @@ func infoRep(idrep int) (info Reperibile, err error) {
 }
 
 //idRep restituisce l'ID del reperibile su DB
-func idRep(cognome string) (id int, err error) {
+func idRep(cognome string) (id int, ok bool, err error) {
 	db, err := sql.Open("sqlite3", dbfile)
 	if err != nil {
-		return -1, fmt.Errorf("Id reperibile non trovato %s", err.Error())
+		return -1, false, fmt.Errorf("Problema ad aprire il DB %s", err.Error())
 	}
 	defer db.Close()
 	retrieveid, err := db.Prepare("select id from reperibile where cognome = ? limit 1")
 	if err != nil {
 		//fmt.Println(err.Error())
-		return -1, fmt.Errorf("Problema con la preparazione della query %s", err.Error())
+		return -1, false, fmt.Errorf("Problema con la preparazione della query %s", err.Error())
 	}
 	row := retrieveid.QueryRow(cognome)
 	err = row.Scan(&id)
 	if err != nil {
 		//fmt.Println(err.Error())
-		return -1, fmt.Errorf("Id reperibile non trovato %s", err.Error())
+		return -1, false, fmt.Errorf("Id reperibile non trovato %s", err.Error())
 	}
 	//fmt.Println(id) //debug
-	return id, nil
+	return id, true, nil
+
+}
+
+//delRep cancella un reperibile
+func delRep(idRep int) (ok bool, err error) {
+	db, err := sql.Open("sqlite3", dbfile)
+	if err != nil {
+		return false, fmt.Errorf("Problema ad aprire il DB %s", err.Error())
+	}
+	defer db.Close()
+	delid, err := db.Prepare("delete from reperibile where id = ?")
+	if err != nil {
+		//fmt.Println(err.Error())
+		return false, fmt.Errorf("Problema con la preparazione della query %s", err.Error())
+	}
+	delass, err := db.Prepare("delete from assegnazione where reperibile_id = ?")
+	if err != nil {
+		//fmt.Println(err.Error())
+		return false, fmt.Errorf("Problema con la preparazione della query %s", err.Error())
+	}
+	_, errass := delass.Exec(idRep)
+	if errass != nil {
+		return false, fmt.Errorf("Problema con la cancellazione delle reperibilità %s", err.Error())
+	}
+	_, errdel := delid.Exec(idRep)
+	if errdel != nil {
+		return false, fmt.Errorf("Problema con la cancellazione del reperibile %s", err.Error())
+	}
+	return true, nil
 
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -86,22 +85,28 @@ func TestIdRep(t *testing.T) {
 
 	type rep []struct {
 		Cognome string
-		Idrep   int
+		Ok      bool
 	}
 
 	var reps rep
 	reps = rep{
-		{Cognome: "Bregliano", Idrep: 1},
+		{Cognome: "Reperibile1", Ok: true},
+		{Cognome: "Reperibile2", Ok: true},
+		{Cognome: "Reperibile3", Ok: false},
+		{Cognome: "Reperibile4", Ok: false},
 	}
 
 	for _, Rep := range reps {
-
-		idrep, err := idRep(Rep.Cognome)
+		var idrep int
+		idrep, ok, err := idRep(Rep.Cognome)
 		if err != nil {
-			fmt.Println(err.Error())
+			t.Skip(err.Error())
 		}
-		if idrep != Rep.Idrep {
-			t.Error("Problema")
+		if ok != Rep.Ok {
+			t.Error(err.Error())
+		}
+		if ok, err := delRep(idrep); ok != Rep.Ok {
+			t.Error(err.Error())
 		}
 	}
 }
