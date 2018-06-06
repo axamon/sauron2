@@ -1,4 +1,4 @@
-package main
+package devel
 
 import (
 	"flag"
@@ -9,6 +9,7 @@ import (
 
 	"database/sql"
 
+	//serve per gestire i db sqlite
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -43,12 +44,6 @@ var piattaforma = flag.String("p", "CDN", "La piattaforma di cui desideri ricava
 
 var contatti []Reperibile
 
-func checkErr(err error) {
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-}
-
 const (
 	dbfile           = "reperibili.db"
 	createreperibile = `
@@ -75,8 +70,8 @@ const (
 var db *sql.DB
 
 //InitDB inzializza il database e restituisce la risorsa
-func InitDB(filepath string) *sql.DB {
-	db, err := sql.Open("sqlite3", filepath)
+func init() {
+	db, err := sql.Open("sqlite3", dbfile)
 	if err != nil {
 		panic(err)
 	}
@@ -84,34 +79,34 @@ func InitDB(filepath string) *sql.DB {
 		panic("db nil")
 	}
 	creadb1, err := db.Prepare(createreperibile)
-	checkErr(err)
-	_, errcreadb1 := creadb1.Exec()
-	checkErr(errcreadb1)
-	creadb2, err := db.Prepare(createassegnazione)
-	checkErr(err)
-	_, errcreadb2 := creadb2.Exec()
-	checkErr(errcreadb2)
-	addreperibile, err := db.Prepare("INSERT INTO reperibile (id,nome, cognome, cellulare) VALUES (?,?, ?,?)")
-	checkErr(err)
-	addreperibile.Exec("1", "Alberto", "Bregliano", "+393357291533")
-	addreperibile.Exec("2", "Antonio", "Gasponi", "+393357291533")
-	return db
-}
-
-func main() {
-	db := InitDB(dbfile)
-	defer db.Close()
-	id, _, err := idRep("Bregliano")
-	fmt.Println(id)
-	id, _, err = idRep("Gasponi")
-	fmt.Println(id)
-	_, id, err = isRepSet("20180606")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Println(id)
-	setRep("20180606", "Bregliano")
+	_, errcreadb1 := creadb1.Exec()
+	if errcreadb1 != nil {
+		fmt.Println(err.Error())
+	}
+	creadb2, err := db.Prepare(createassegnazione)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	_, errcreadb2 := creadb2.Exec()
+	if errcreadb2 != nil {
+		fmt.Println(err.Error())
+	}
+	addreperibile, err := db.Prepare("INSERT INTO reperibile (id,nome, cognome, cellulare) VALUES (?,?, ?,?)")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	_, err1 := addreperibile.Exec("1", "Alberto", "Bregliano", "+393357291533")
+	if err1 != nil {
+		fmt.Println(err.Error())
+	}
 
+	_, err2 := addreperibile.Exec("2", "Antonio", "Gasponi", "+393357291533")
+	if err2 != nil {
+		fmt.Println(err.Error())
+	}
 }
 
 //addRep Aggiunge un reperibile al DB
