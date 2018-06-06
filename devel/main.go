@@ -5,15 +5,16 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/axamon/sauron2/sms"
+
 	"database/sql"
 
-	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 //Reperibile è la variabile con i dati personali dei reperibili
 type Reperibile struct {
-	gorm.Model
+	id           int
 	Nome         string
 	Cognome      string
 	Cellulare    string
@@ -22,7 +23,6 @@ type Reperibile struct {
 
 //Assegnazione è la variabile con i dati relativi alla ruota di reperibilità
 type Assegnazione struct {
-	gorm.Model
 	Piattaforma  string
 	Giorno       string
 	Gruppo       string
@@ -54,9 +54,6 @@ const (
 	createreperibile = `
 	CREATE TABLE IF NOT EXISTS reperibile (
 		id	integer PRIMARY KEY AUTOINCREMENT,
-		created_at	datetime,
-		updated_at	datetime,
-		deleted_at	datetime,
 		nome	varchar ( 255 ),
 		cognome	varchar ( 255 ),
 		cellulare	varchar ( 255 )
@@ -104,11 +101,11 @@ func InitDB(filepath string) *sql.DB {
 func main() {
 	db := InitDB(dbfile)
 	defer db.Close()
-	id := repID("Bregliano")
+	id, err := idRep("Bregliano")
 	fmt.Println(id)
-	id = repID("Gasponi")
+	id, err = idRep("Gasponi")
 	fmt.Println(id)
-	id, err := isRepSet("20180606")
+	_, id, err = isRepSet("20180606")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -117,47 +114,128 @@ func main() {
 
 }
 
+//addRep Aggiunge un reperibile al DB
+func addRep(nome, cognome, cellulare string) (ok bool, err error) {
+	if ok := sms.Verificacellulare(cellulare); ok != true {
+		return false, fmt.Errorf("Cellulare inserito non nel formato +39(10)cifre")
+	}
+	db, err := sql.Open("sqlite3", dbfile)
+	if err != nil {
+		//fmt.Println(err.Error())
+		return false, fmt.Errorf("Problema ad aprire il DB %s", err.Error())
+	}
+	defer db.Close()
+	verificaprimachenonesistagia, err := db.Prepare("select count(*) from reperibile where nome = ? and cognome = ? and cellulare = ?")
+	if err != nil {
+		//fmt.Println(err.Error())
+		return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
+	}
+	addreperibile, err := db.Prepare("INSERT INTO reperibile (nome, cognome, cellulare) VALUES (?, ?,?)")
+	if err != nil {
+		//fmt.Println(err.Error())
+		return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
+	}
+	var exist bool
+	row := verificaprimachenonesistagia.QueryRow(nome, cognome, cellulare)
+	errrow := row.Scan(&exist)
+	if errrow != sql.ErrNoRows {
+		return false, fmt.Errorf("Impossibile inserire reperibile %s", err.Error())
+	}
+	_, erraddrep := addreperibile.Exec(nome, cognome, cellulare)
+	if erraddrep != nil {
+		return false, fmt.Errorf("Impossibile inserire reperibile %s", err.Error())
+	}
+	return true, nil
+}
+
+//setRep assegna un reperibile al giorno
 func setRep(giorno, cognome string) (ok bool, err error) {
 	db, err := sql.Open("sqlite3", dbfile)
-	checkErr(err)
-	defer db.Close()
-	repID := repID(cognome)
-	settaRep, err := db.Prepare("insert into assegnazione (giorno, reperibile_id) values(?,?)")
-	checkErr(err)
-	_, err = settaRep.Exec(giorno, repID)
 	if err != nil {
-		return false, fmt.Errorf("Errore %v", err.Error())
+		//fmt.Println(err.Error())
+		return false, fmt.Errorf("Problema ad aprire il DB %s", err.Error())
+	}
+	defer db.Close()
+	idrep, err := idRep(cognome)
+	if err != nil {
+		//fmt.Println(err.Error())
+		return false, fmt.Errorf("Id reperibile non trovato %s", err.Error())
+	}
+	settaRep, err := db.Prepare("insert into assegnazione (giorno, reperibile_id) values(?,?)")
+	if err != nil {
+		//fmt.Println(err.Error())
+		return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
+	}
+	_, err = settaRep.Exec(giorno, idrep)
+	if err != nil {
+		return false, fmt.Errorf("Problema a settare il reperibile %s", err.Error())
 	}
 	return true, nil
 
 }
 
-func isRepSet(giorno string) (reperibileID int, err error) {
+//isRepSet informa se un Reperibile è stato impostato per il giorno e qual' è il suo id
+func isRepSet(giorno string) (ok bool, reperibileID int, err error) {
 	db, err := sql.Open("sqlite3", dbfile)
-	checkErr(err)
+	if err != nil {
+		//fmt.Println(err.Error())
+		return false, -1, fmt.Errorf("Id reperibile non trovato %s", err.Error())
+	}
 	defer db.Close()
 	cercagiorno, err := db.Prepare("select reperibile_id from assegnazione where giorno = ?")
 	if err != nil {
-		return -1, fmt.Errorf("errore: %v", err.Error())
+		return false, -1, fmt.Errorf("errore: %v", err.Error())
 	}
 	row := cercagiorno.QueryRow(giorno)
 	err = row.Scan(&reperibileID)
 	if err != nil {
-		return -1, fmt.Errorf("errore: %v", err.Error())
+		return false, -1, fmt.Errorf("errore: %v", err.Error())
 	}
-	return reperibileID, nil
+	return true, reperibileID, nil
 }
 
-func repID(cognome string) (id int) {
+//infoRep restituisce l'ID del reperibile su DB
+func infoRep(idrep int) (info Reperibile, err error) {
 	db, err := sql.Open("sqlite3", dbfile)
-	checkErr(err)
+	if err != nil {
+		return Reperibile{}, fmt.Errorf("Id reperibile non trovato %s", err.Error())
+	}
+	defer db.Close()
+	retrieveinfo, err := db.Prepare("select nome, cognome, cellulare from reperibile where id = ? limit 1")
+	if err != nil {
+		//fmt.Println(err.Error())
+		return Reperibile{}, fmt.Errorf("Problema con la preparazione della query %s", err.Error())
+	}
+	row := retrieveinfo.QueryRow(info.Nome, info.Cognome, info.Cellulare)
+	err = row.Scan(&info)
+	if err != nil {
+		//fmt.Println(err.Error())
+		return Reperibile{}, fmt.Errorf("Id reperibile non trovato %s", err.Error())
+	}
+	//fmt.Println(id) //debug
+	return info, nil
+
+}
+
+//idRep restituisce l'ID del reperibile su DB
+func idRep(cognome string) (id int, err error) {
+	db, err := sql.Open("sqlite3", dbfile)
+	if err != nil {
+		return -1, fmt.Errorf("Id reperibile non trovato %s", err.Error())
+	}
 	defer db.Close()
 	retrieveid, err := db.Prepare("select id from reperibile where cognome = ? limit 1")
-	checkErr(err)
+	if err != nil {
+		//fmt.Println(err.Error())
+		return -1, fmt.Errorf("Problema con la preparazione della query %s", err.Error())
+	}
 	row := retrieveid.QueryRow(cognome)
 	err = row.Scan(&id)
-	checkErr(err)
+	if err != nil {
+		//fmt.Println(err.Error())
+		return -1, fmt.Errorf("Id reperibile non trovato %s", err.Error())
+	}
 	//fmt.Println(id) //debug
-	return id
+	return id, nil
 
 }
