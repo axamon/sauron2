@@ -5,6 +5,7 @@ import (
 )
 
 func TestAddRep(t *testing.T) {
+
 	type rep []struct {
 		Nome      string
 		Cognome   string
@@ -72,9 +73,18 @@ func TestIsRepSet(t *testing.T) {
 
 	for _, Rep := range reps {
 
-		ok, _, err := isRepSet(Rep.Giorno)
+		ok, idrep, err := isRepSet(Rep.Giorno)
 		if ok != Rep.Ok {
 			t.Error("Reperibile non settato", err.Error())
+		}
+		ok, info, err := infoRep(idrep)
+		if ok != Rep.Ok {
+			t.Error("Reperibile non settato", err.Error())
+		}
+		if ok == true {
+			if Rep.Cognome != info.Cognome {
+				t.Error("Reperibile sbagliato", err.Error())
+			}
 		}
 
 	}

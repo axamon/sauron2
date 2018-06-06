@@ -200,25 +200,25 @@ func isRepSet(giorno string) (ok bool, reperibileID int, err error) {
 }
 
 //infoRep restituisce l'ID del reperibile su DB
-func infoRep(idrep int) (info Reperibile, err error) {
+func infoRep(idrep int) (ok bool, info Reperibile, err error) {
 	db, err := sql.Open("sqlite3", dbfile)
 	if err != nil {
-		return Reperibile{}, fmt.Errorf("Id reperibile non trovato %s", err.Error())
+		return false, Reperibile{}, fmt.Errorf("Problema ad aprire il DB %s", err.Error())
 	}
 	defer db.Close()
 	retrieveinfo, err := db.Prepare("select nome, cognome, cellulare from reperibile where id = ? limit 1")
 	if err != nil {
 		//fmt.Println(err.Error())
-		return Reperibile{}, fmt.Errorf("Problema con la preparazione della query %s", err.Error())
+		return false, Reperibile{}, fmt.Errorf("Problema con la preparazione della query %s", err.Error())
 	}
-	row := retrieveinfo.QueryRow(info.Nome, info.Cognome, info.Cellulare)
-	err = row.Scan(&info)
+	row := retrieveinfo.QueryRow(idrep)
+	err = row.Scan(&info.Nome, &info.Cognome, &info.Cellulare)
 	if err != nil {
 		//fmt.Println(err.Error())
-		return Reperibile{}, fmt.Errorf("Id reperibile non trovato %s", err.Error())
+		return false, Reperibile{}, fmt.Errorf("Id reperibile non trovato %s", err.Error())
 	}
 	//fmt.Println(id) //debug
-	return info, nil
+	return true, info, nil
 
 }
 
