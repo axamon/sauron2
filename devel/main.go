@@ -1,4 +1,4 @@
-package devel
+package main
 
 import (
 	"flag"
@@ -94,19 +94,23 @@ func init() {
 	if errcreadb2 != nil {
 		fmt.Println(err.Error())
 	}
-	addreperibile, err := db.Prepare("INSERT INTO reperibile (id,nome, cognome, cellulare) VALUES (?,?, ?,?)")
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	_, err1 := addreperibile.Exec("1", "Alberto", "Bregliano", "+393357291533")
-	if err1 != nil {
-		fmt.Println(err.Error())
-	}
+	/* 	addreperibile, err := db.Prepare("INSERT INTO reperibile (id,nome, cognome, cellulare) VALUES (?,?, ?,?)")
+	   	if err != nil {
+	   		fmt.Println(err.Error())
+	   	}
+	   	_, err1 := addreperibile.Exec("1", "Alberto", "Bregliano", "+393357291533")
+	   	if err1 != nil {
+	   		fmt.Println(err.Error())
+	   	}
 
-	_, err2 := addreperibile.Exec("2", "Antonio", "Gasponi", "+393357291533")
-	if err2 != nil {
-		fmt.Println(err.Error())
-	}
+	   	_, err2 := addreperibile.Exec("2", "Antonio", "Gasponi", "+393357291533")
+	   	if err2 != nil {
+	   		fmt.Println(err.Error())
+	   	} */
+}
+
+func main() {
+
 }
 
 //addRep Aggiunge un reperibile al DB

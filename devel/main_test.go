@@ -1,4 +1,4 @@
-package devel
+package main
 
 import (
 	"testing"
