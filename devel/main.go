@@ -110,7 +110,11 @@ func init() {
 }
 
 func main() {
-	addRep("Rep2", "Reperibile2", "+391234567892")
+	_, err := addRep("Rep2", "Reperibile2", "+391234567892")
+	if err != nil {
+		fmt.Println(err)
+	}
+	setRep("20180609", "Reperibile2")
 }
 
 //addRep Aggiunge un reperibile al DB
@@ -124,17 +128,21 @@ func addRep(nome, cognome, cellulare string) (ok bool, err error) {
 		return false, fmt.Errorf("Problema ad aprire il DB %s", err.Error())
 	}
 	defer db.Close()
-	verificaprimachenonesistagia, err := db.Prepare("select id from reperibile where cellulare = ?")
+	verificaprimachenonesistagia, err := db.Prepare("select count(*) from reperibile where cognome = ?")
 	if err != nil {
 		//fmt.Println(err.Error())
 		return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
 	}
 
 	var exist interface{}
-	errow := verificaprimachenonesistagia.QueryRow(cellulare).Scan(exist)
+	err = verificaprimachenonesistagia.QueryRow(cognome).Scan(&exist)
+	if err != nil {
+		fmt.Println(err)
+	}
 	db.Close()
+	//fmt.Println(exist)
 	switch {
-	case errow == sql.ErrNoRows:
+	case exist.(int64) == 0:
 		db, err := sql.Open("sqlite3", dbfile)
 		if err != nil {
 			//fmt.Println(err.Error())
@@ -153,7 +161,7 @@ func addRep(nome, cognome, cellulare string) (ok bool, err error) {
 		return true, nil
 
 	default:
-		return false, fmt.Errorf("Impossibile inserire reperibile %s", err.Error())
+		return false, fmt.Errorf("Impossibile inserire reperibile")
 	}
 
 }
@@ -171,6 +179,31 @@ func setRep(giorno, cognome string) (ok bool, err error) {
 		//fmt.Println(err.Error())
 		return false, fmt.Errorf("Id reperibile non trovato %s", err.Error())
 	}
+	verifica, err := db.Prepare("select count(*) from assegnazione where giorno = ?")
+	if err != nil {
+		return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
+	}
+	var exist interface{}
+	err = verifica.QueryRow(giorno).Scan(&exist)
+	if err != nil {
+		return false, fmt.Errorf("Impossibile contare assegnazioni")
+	}
+	switch {
+	case exist == 0:
+		goto INSERISCI
+	default:
+		cancella, err := db.Prepare("delete from assegnazione where giorno = ?")
+		if err != nil {
+			//fmt.Println(err.Error())
+			return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
+		}
+		_, err = cancella.Exec(giorno)
+		if err != nil {
+			return false, fmt.Errorf("Impossibile cancellare")
+		}
+		goto INSERISCI
+	}
+INSERISCI:
 	settaRep, err := db.Prepare("insert into assegnazione (giorno, reperibile_id) values(?,?)")
 	if err != nil {
 		//fmt.Println(err.Error())
