@@ -110,7 +110,7 @@ func init() {
 }
 
 func main() {
-
+	addRep("Rep2", "Reperibile2", "+391234567892")
 }
 
 //addRep Aggiunge un reperibile al DB
@@ -147,7 +147,7 @@ func addRep(nome, cognome, cellulare string) (ok bool, err error) {
 		return true, nil
 
 	default:
-		return false, fmt.Errorf("Impossibile inserire reperibile %s", err.Error())
+		return false, fmt.Errorf("Impossibile inserire reperibile %s", err.Error(), nome, cognome, cellulare)
 	}
 
 }

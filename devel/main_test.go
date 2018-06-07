@@ -19,12 +19,13 @@ func TestAddRep(t *testing.T) {
 		{Nome: "Rep2", Cognome: "Reperibile2", Cellulare: "+391234567892", Ok: true},
 		{Nome: "Rep3", Cognome: "Reperibile3", Cellulare: "+39123456789", Ok: false},
 		{Nome: "Rep4", Cognome: "Reperibile4", Cellulare: "3234567893", Ok: false},
+		{Nome: "Rep2", Cognome: "Reperibile2", Cellulare: "+391234567892", Ok: false},
 	}
 
 	for _, Rep := range reps {
 
 		if ok, err := addRep(Rep.Nome, Rep.Cognome, Rep.Cellulare); ok != Rep.Ok {
-			t.Error("Problema a settare il Reperibile", err.Error())
+			t.Error("Problema nel settare il Reperibile", err.Error(), Rep)
 		}
 
 	}
