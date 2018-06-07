@@ -147,7 +147,7 @@ func addRep(nome, cognome, cellulare string) (ok bool, err error) {
 		return true, nil
 
 	default:
-		return false, fmt.Errorf("Impossibile inserire reperibile %s", err.Error(), nome, cognome, cellulare)
+		return false, fmt.Errorf("Impossibile inserire reperibile %s", err.Error())
 	}
 
 }
