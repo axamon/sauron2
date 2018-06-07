@@ -46,8 +46,7 @@ func Retrievestatus(sid string) (status string, err error) {
 
 	res, errres := http.DefaultClient.Do(req)
 	if errres != nil {
-		//log.Fatal(errres)
-		return "", fmt.Errorf("Errore nella http richiesta %v", errres)
+		fmt.Fprintln(os.Stderr, errres.Error())
 	}
 
 	defer res.Body.Close()
@@ -64,8 +63,7 @@ func Retrievestatus(sid string) (status string, err error) {
 	v := TwilioResponse{}
 	errstat := xml.Unmarshal(body, &v)
 	if errstat != nil {
-		//fmt.Printf("error: %v", err)
-		return "", fmt.Errorf("Problema con unmarshalling twilioresponse %v", errstat)
+		fmt.Fprintln(os.Stderr, errstat.Error())
 	}
 
 	//fmt.Printf("Status: %s\n", v.Status)
