@@ -132,9 +132,14 @@ func addRep(nome, cognome, cellulare string) (ok bool, err error) {
 
 	var exist interface{}
 	errow := verificaprimachenonesistagia.QueryRow(cellulare).Scan(exist)
-
+	db.Close()
 	switch {
 	case errow == sql.ErrNoRows:
+		db, err := sql.Open("sqlite3", dbfile)
+		if err != nil {
+			//fmt.Println(err.Error())
+			return false, fmt.Errorf("Problema ad aprire il DB %s", err.Error())
+		}
 		addreperibile, err := db.Prepare("INSERT INTO reperibile (nome, cognome, cellulare) VALUES (?, ?,?)")
 		if err != nil {
 			//fmt.Println(err.Error())
@@ -144,6 +149,7 @@ func addRep(nome, cognome, cellulare string) (ok bool, err error) {
 		if erraddrep != nil {
 			return false, fmt.Errorf("Impossibile inserire reperibile %s", err.Error())
 		}
+		db.Close()
 		return true, nil
 
 	default:

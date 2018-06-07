@@ -7,6 +7,7 @@ import (
 func TestAddRep(t *testing.T) {
 
 	type rep []struct {
+		Giorno    string
 		Nome      string
 		Cognome   string
 		Cellulare string
@@ -15,11 +16,10 @@ func TestAddRep(t *testing.T) {
 
 	var reps rep
 	reps = rep{
-		{Nome: "Rep1", Cognome: "Reperibile1", Cellulare: "+391234567891", Ok: true},
-		{Nome: "Rep2", Cognome: "Reperibile2", Cellulare: "+391234567892", Ok: true},
-		{Nome: "Rep3", Cognome: "Reperibile3", Cellulare: "+39123456789", Ok: false},
-		{Nome: "Rep4", Cognome: "Reperibile4", Cellulare: "3234567893", Ok: false},
-		{Nome: "Rep2", Cognome: "Reperibile2", Cellulare: "+391234567892", Ok: false},
+		{Giorno: "20180101", Nome: "Rep1", Cognome: "Reperibile1", Cellulare: "+391234567891", Ok: true},
+		{Giorno: "20180102", Nome: "Rep2", Cognome: "Reperibile2", Cellulare: "+391234567892", Ok: true},
+		{Giorno: "20180103", Nome: "Rep3", Cognome: "Reperibile3", Cellulare: "+39123456789", Ok: false},
+		{Giorno: "20180104", Nome: "Rep4", Cognome: "Reperibile4", Cellulare: "3234567893", Ok: false},
 	}
 
 	for _, Rep := range reps {
@@ -29,22 +29,6 @@ func TestAddRep(t *testing.T) {
 		}
 
 	}
-}
-
-func TestSetRep(t *testing.T) {
-	type rep []struct {
-		Giorno  string
-		Cognome string
-		Ok      bool
-	}
-
-	var reps rep
-	reps = rep{
-		{Giorno: "20180101", Cognome: "Reperibile1", Ok: true},
-		{Giorno: "20180102", Cognome: "Reperibile2", Ok: true},
-		{Giorno: "20180103", Cognome: "Reperibile3", Ok: false},
-		{Giorno: "20180103", Cognome: "Reperibile4", Ok: false},
-	}
 
 	for _, Rep := range reps {
 
@@ -53,25 +37,6 @@ func TestSetRep(t *testing.T) {
 		}
 
 	}
-}
-
-//TestIsRepSet verifica che ci sia un reperibile assegnato al giorno
-func TestIsRepSet(t *testing.T) {
-
-	type rep []struct {
-		Giorno  string
-		Cognome string
-		Ok      bool
-	}
-
-	var reps rep
-	reps = rep{
-		{Giorno: "20180101", Cognome: "Reperibile1", Ok: true},
-		{Giorno: "20180102", Cognome: "Reperibile2", Ok: true},
-		{Giorno: "20180103", Cognome: "Reperibile3", Ok: false},
-		{Giorno: "20180103", Cognome: "Reperibile4", Ok: false},
-	}
-
 	for _, Rep := range reps {
 
 		ok, idrep, err := isRepSet(Rep.Giorno)
@@ -89,24 +54,6 @@ func TestIsRepSet(t *testing.T) {
 		}
 
 	}
-}
-
-//TestIdRep verifica che gli id sul DB corrispondano
-func TestIdRep(t *testing.T) {
-
-	type rep []struct {
-		Cognome string
-		Ok      bool
-	}
-
-	var reps rep
-	reps = rep{
-		{Cognome: "Reperibile1", Ok: true},
-		{Cognome: "Reperibile2", Ok: true},
-		{Cognome: "Reperibile3", Ok: false},
-		{Cognome: "Reperibile4", Ok: false},
-	}
-
 	for _, Rep := range reps {
 		var idrep int
 		idrep, ok, err := idRep(Rep.Cognome)
