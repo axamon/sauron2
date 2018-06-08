@@ -18,10 +18,15 @@ import (
 	"fmt"
 	"os"
 
+	raven "github.com/getsentry/raven-go"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+func init() {
+	raven.SetDSN("https://3c8659c6cced4338a494519ca736de01:a9831014cc5540468e380a7bb5343108@sentry.io/1222500")
+}
 
 var cfgFile string
 

@@ -14,7 +14,14 @@
 
 package main
 
-import "github.com/axamon/sauron2/cmd"
+import (
+	"github.com/axamon/sauron2/cmd"
+	raven "github.com/getsentry/raven-go"
+)
+
+func init() {
+	raven.SetDSN("https://3c8659c6cced4338a494519ca736de01:a9831014cc5540468e380a7bb5343108@sentry.io/1222500")
+}
 
 func main() {
 	cmd.Execute()
