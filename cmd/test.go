@@ -20,6 +20,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/getsentry/raven-go"
+
 	"github.com/axamon/sauron2/sms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -35,7 +37,9 @@ var testCmd = &cobra.Command{
 		cellditest := viper.GetString("Cellpertest")
 
 		if ok := sms.Verificacellulare(cellditest); ok == false {
-			fmt.Printf("cellulare nel formato errato %s\n", cellditest)
+			fmt.Fprintln(os.Stdout, "cellulare nel formato errato")
+			err := fmt.Errorf("Formato cellulare non valido %s", cellditest)
+			raven.CaptureErrorAndWait(err, nil)
 		}
 
 		timeout := time.Duration(10 * time.Second)
@@ -45,11 +49,16 @@ var testCmd = &cobra.Command{
 		resp, err := client.Get("http://google.com")
 		if err != nil {
 			fmt.Fprintln(os.Stdout, "errore nel contattare internet", err.Error())
+			errRaven := fmt.Errorf("errore nel contattare internet %s", err.Error())
+			raven.CaptureErrorAndWait(errRaven, nil)
 			os.Exit(1)
 		}
 
 		if httpstatus := resp.StatusCode; httpstatus > 399 {
 			fmt.Fprintln(os.Stdout, "errore httpstatus: ", httpstatus)
+			errRaven := fmt.Errorf("errore con collegamento internet, httpstatus: %d, %s", httpstatus, err.Error())
+			raven.CaptureErrorAndWait(errRaven, nil)
+			os.Exit(1)
 		}
 
 		messaggio := ("Notifiche vocali correttamente funzionanti")

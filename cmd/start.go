@@ -20,6 +20,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/getsentry/raven-go"
+
 	"github.com/spf13/viper"
 
 	"github.com/axamon/sauron2/cercasid"
@@ -109,6 +111,7 @@ var startCmd = &cobra.Command{
 		//Se ci sono problemi ad accedere al file nagioslog esce.
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
+			raven.CaptureErrorAndWait(err, nil)
 			//TODO: verificare che sia opportuno questo exit, fa spegnere sauron...
 			os.Exit(1)
 		}
