@@ -70,7 +70,7 @@ func TestInviasms(t *testing.T) {
 			t.Skip("Bisogna settare le variabili")
 		}
 		if err != nil {
-			t.Skip(err.Error())
+			t.Error(err.Error())
 		}
 	}
 }
