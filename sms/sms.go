@@ -29,7 +29,10 @@ func recuperavariabile(variabile string) (result string, err error) {
 	if result, ok := os.LookupEnv(variabile); ok && len(result) != 0 {
 		return result, nil
 	}
-	return "", fmt.Errorf("la variabile %s non esiste o è vuota", variabile)
+	err = fmt.Errorf("la variabile %s non esiste o è vuota", variabile)
+	fmt.Fprintln(os.Stderr, err.Error())
+	raven.CaptureError(err, nil)
+	return "", err
 }
 
 //Inviasms invia sms via Twilio
@@ -37,27 +40,12 @@ func Inviasms(to, body string) (result string, err error) {
 
 	//Recupera il numero di Twilio dallla variabile d'ambiente
 	TWILIONUMBER, err := recuperavariabile("TWILIONUMBER")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		raven.CaptureErrorAndWait(err, nil)
-		return "", err
-	}
 
 	//Recupera TWILIOACCOUNTSID  dallla variabile d'ambiente
 	TWILIOACCOUNTSID, err := recuperavariabile("TWILIOTWILIOACCOUNTSID")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		raven.CaptureErrorAndWait(err, nil)
-		return "", err
-	}
 
 	//Recupera il token supersegreto dalla variabile d'ambiente
 	TWILIOAUTHTOKEN, err := recuperavariabile("TWILIOTWILIOAUTHTOKEN")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		raven.CaptureErrorAndWait(err, nil)
-		return "", err
-	}
 
 	//TODO vedere se riesce a prendere anche le variabili da ambiente windows...
 	//...ma anche no! :)
@@ -82,8 +70,8 @@ func Inviasms(to, body string) (result string, err error) {
 	if err != nil {
 		err = fmt.Errorf("Errore nella creazione della richiesta post: %s", err.Error())
 		fmt.Fprintln(os.Stderr, err.Error())
-		raven.CaptureErrorAndWait(err, nil)
-		return "", err
+		raven.CaptureError(err, nil)
+		//return "", err
 	}
 
 	//Utiliziamo l'autenticazione basic
@@ -96,13 +84,13 @@ func Inviasms(to, body string) (result string, err error) {
 	if err != nil {
 		err = fmt.Errorf("Errore nella ricesione response: %s", err.Error())
 		fmt.Fprintln(os.Stderr, err.Error())
-		raven.CaptureErrorAndWait(err, nil)
-		return "", err
+		raven.CaptureError(err, nil)
+		//return "", err
 	}
 
 	//controlliamo che ha da dire la response
 	//Restituisce codice e significato, se ricevi 201 CREATED allora è ok.
 	//fmt.Println(resp.Status)
 
-	return resp.Status, nil
+	return resp.Status, err
 }
