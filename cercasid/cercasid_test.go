@@ -32,7 +32,7 @@ func TestCercasid(t *testing.T) {
 
 	status, err := Retrievestatus(sid)
 	if err != nil {
-		t.Errorf("Errore %s", err.Error())
+		t.Skip(err.Error())
 	}
 	if status != "busy" {
 		t.Skip("Errore nel recupero sid", status)
