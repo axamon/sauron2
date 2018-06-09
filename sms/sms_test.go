@@ -23,7 +23,7 @@ func TestVerificacellulare(t *testing.T) {
 	}
 	for _, cellulare := range numeri {
 		if ok := Verificacellulare(cellulare.Numcell); ok != cellulare.Valido {
-			err := fmt.Errorf("Formato cellulare non valido", cellulare.Numcell)
+			err := fmt.Errorf("Formato cellulare non valido %s", cellulare.Numcell)
 			raven.CaptureErrorAndWait(err, nil)
 			t.Error(err)
 		}
