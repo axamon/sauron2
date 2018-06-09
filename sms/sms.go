@@ -39,18 +39,21 @@ func Inviasms(to, body string) (result string) {
 	TWILIONUMBER, err := recuperavariabile("TWILIONUMBER")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
+		raven.CaptureErrorAndWait(err, nil)
 	}
 
 	//Recupera l'accountsid di Twilio dallla variabile d'ambiente
 	accountSid, err := recuperavariabile("TWILIOACCOUNTSID")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
+		raven.CaptureErrorAndWait(err, nil)
 	}
 
 	//Recupera il token supersegreto dalla variabile d'ambiente
 	authToken, err := recuperavariabile("TWILIOAUTHTOKEN")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
+		raven.CaptureErrorAndWait(err, nil)
 	}
 
 	//TODO vedere se riesce a prendere anche le variabili da ambiente windows...
@@ -75,6 +78,7 @@ func Inviasms(to, body string) (result string) {
 	req, err := http.NewRequest("POST", urlStr, &rb)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "OH noooo! Qualcosa è andata storta nel creare la richiesta", err.Error())
+		raven.CaptureErrorAndWait(err, nil)
 	}
 
 	//Utiliziamo l'autenticazione basic
