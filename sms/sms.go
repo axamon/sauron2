@@ -33,13 +33,14 @@ func recuperavariabile(variabile string) (result string, err error) {
 }
 
 //Inviasms invia sms via Twilio
-func Inviasms(to, body string) (result string) {
+func Inviasms(to, body string) (result string, err error) {
 
 	//Recupera il numero di Twilio dallla variabile d'ambiente
 	TWILIONUMBER, err := recuperavariabile("TWILIONUMBER")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		raven.CaptureErrorAndWait(err, nil)
+		return "", err
 	}
 
 	//Recupera l'accountsid di Twilio dallla variabile d'ambiente
@@ -47,6 +48,7 @@ func Inviasms(to, body string) (result string) {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		raven.CaptureErrorAndWait(err, nil)
+		return "", err
 	}
 
 	//Recupera il token supersegreto dalla variabile d'ambiente
@@ -54,6 +56,7 @@ func Inviasms(to, body string) (result string) {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		raven.CaptureErrorAndWait(err, nil)
+		return "", err
 	}
 
 	//TODO vedere se riesce a prendere anche le variabili da ambiente windows...
@@ -77,8 +80,10 @@ func Inviasms(to, body string) (result string) {
 	//Creiamo la http request da inviare dopo
 	req, err := http.NewRequest("POST", urlStr, &rb)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "OH noooo! Qualcosa è andata storta nel creare la richiesta", err.Error())
+		err = fmt.Errorf("Errore nella creazione della richiesta post: %s", err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
 		raven.CaptureErrorAndWait(err, nil)
+		return "", err
 	}
 
 	//Utiliziamo l'autenticazione basic
@@ -90,15 +95,15 @@ func Inviasms(to, body string) (result string) {
 	//Finalmente inviamo la request e salviamo la http response
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "OH noooo! Qualcosa è andata storta nell'inviare la richiesta", err)
+		err = fmt.Errorf("Errore nella ricesione response: %s", err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
+		raven.CaptureErrorAndWait(err, nil)
+		return "", err
 	}
 
 	//controlliamo che ha da dire la response
 	//Restituisce codice e significato, se ricevi 201 CREATED allora è ok.
 	//fmt.Println(resp.Status)
 
-	//Usciamo con zero che significa tutto ok!
-	//a quanto pare un exit qui ammazza anche la funzione padre che lo ha chiamato...
-	//os.Exit(0)
-	return resp.Status
+	return resp.Status, nil
 }
