@@ -67,12 +67,6 @@ func Inviasms(to, body string) (result string, err error) {
 
 	//Creiamo la http request da inviare dopo
 	req, err := http.NewRequest("POST", urlStr, &rb)
-	if err != nil {
-		err = fmt.Errorf("Errore nella creazione della richiesta post: %s", err.Error())
-		fmt.Fprintln(os.Stderr, err.Error())
-		raven.CaptureError(err, nil)
-		//return "", err
-	}
 
 	//Utiliziamo l'autenticazione basic
 	req.SetBasicAuth(TWILIOACCOUNTSID, TWILIOAUTHTOKEN)
@@ -81,6 +75,7 @@ func Inviasms(to, body string) (result string, err error) {
 
 	// Inviamo la request e salviamo la http response
 	resp, err := client.Do(req)
+
 	if err != nil {
 		err = fmt.Errorf("Errore nella ricesione response: %s", err.Error())
 		fmt.Fprintln(os.Stderr, err.Error())
@@ -88,9 +83,11 @@ func Inviasms(to, body string) (result string, err error) {
 		//return "", err
 	}
 
+	result = resp.Status
+
 	//controlliamo che ha da dire la response
 	//Restituisce codice e significato, se ricevi 201 CREATED allora è ok.
 	//fmt.Println(resp.Status)
 
-	return resp.Status, err
+	return
 }
