@@ -1,8 +1,11 @@
 package sms
 
 import (
+	"fmt"
 	"os"
 	"testing"
+
+	"github.com/getsentry/raven-go"
 )
 
 func TestVerificacellulare(t *testing.T) {
@@ -20,7 +23,9 @@ func TestVerificacellulare(t *testing.T) {
 	}
 	for _, cellulare := range numeri {
 		if ok := Verificacellulare(cellulare.Numcell); ok != cellulare.Valido {
-			t.Error("Formato cellulare non valido", cellulare.Numcell)
+			err := fmt.Errorf("Formato cellulare non valido", cellulare.Numcell)
+			raven.CaptureErrorAndWait(err)
+			t.Error(err)
 		}
 	}
 }
