@@ -170,6 +170,7 @@ var startCmd = &cobra.Command{
 						status, err := cercasid.Retrievestatus(sid)
 						if err != nil {
 							fmt.Println(time.Now().Format(time.RFC3339), err.Error())
+							raven.CaptureError(err, nil)
 						}
 						//se lo status è completed esce dalla gooutine
 						if status == "completed" {

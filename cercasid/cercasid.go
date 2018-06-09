@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+
+	"github.com/getsentry/raven-go"
 )
 
 func recuperavariabile(variabile string) (result string, err error) {
@@ -28,29 +30,46 @@ func Retrievestatus(sid string) (status string, err error) {
 	accountSid, err := recuperavariabile("TWILIOACCOUNTSID")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
+		return "", err
 	}
 
 	//Recupera il token supersegreto dalla variabile d'ambiente
 	authToken, err := recuperavariabile("TWILIOAUTHTOKEN")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
+		return "", err
 	}
 
 	url := "https://api.twilio.com/2010-04-01/Accounts/" + accountSid + "/Calls/" + sid
 
-	req, _ := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		err = fmt.Errorf("Impossibile creare http request %s", err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
+		raven.CaptureError(err, nil)
+		return "", err
+	}
 
 	req.SetBasicAuth(accountSid, authToken)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	res, errres := http.DefaultClient.Do(req)
-	if errres != nil {
-		fmt.Fprintln(os.Stderr, errres.Error())
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		err = fmt.Errorf("Impossibile ricevere response: %s", err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
+		raven.CaptureError(err, nil)
+		return "", err
 	}
 
 	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		err = fmt.Errorf("Impossibile leggere body response: %s", err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
+		raven.CaptureError(err, nil)
+		return "", err
+	}
 
 	//fmt.Println(res)
 	//fmt.Println(string(body))
@@ -61,12 +80,15 @@ func Retrievestatus(sid string) (status string, err error) {
 	}
 
 	v := TwilioResponse{}
-	errstat := xml.Unmarshal(body, &v)
-	if errstat != nil {
-		fmt.Fprintln(os.Stderr, errstat.Error())
+	err = xml.Unmarshal(body, &v)
+	if err != nil {
+		err = fmt.Errorf("Problemi con il parsing del xml twilio di risposta: %s", err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
+		raven.CaptureError(err, nil)
+		return "", err
 	}
 
 	//fmt.Printf("Status: %s\n", v.Status)
-
+	raven.CaptureMessage(v.Status, nil)
 	return v.Status, nil
 }
