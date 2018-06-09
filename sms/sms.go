@@ -43,8 +43,8 @@ func Inviasms(to, body string) (result string, err error) {
 		return "", err
 	}
 
-	//Recupera l'accountsid di Twilio dallla variabile d'ambiente
-	accountSid, err := recuperavariabile("TWILIOACCOUNTSID")
+	//Recupera TWILIOACCOUNTSID  dallla variabile d'ambiente
+	TWILIOACCOUNTSID, err := recuperavariabile("TWILIOTWILIOACCOUNTSID")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		raven.CaptureErrorAndWait(err, nil)
@@ -52,7 +52,7 @@ func Inviasms(to, body string) (result string, err error) {
 	}
 
 	//Recupera il token supersegreto dalla variabile d'ambiente
-	authToken, err := recuperavariabile("TWILIOAUTHTOKEN")
+	TWILIOAUTHTOKEN, err := recuperavariabile("TWILIOTWILIOAUTHTOKEN")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		raven.CaptureErrorAndWait(err, nil)
@@ -63,7 +63,7 @@ func Inviasms(to, body string) (result string, err error) {
 	//...ma anche no! :)
 
 	//Crea la URL necessaria per richiamare la funzionalità degli SMS di Twilio
-	urlStr := "https://api.twilio.com/2010-04-01/Accounts/" + accountSid + "/Messages.json"
+	urlStr := "https://api.twilio.com/2010-04-01/Accounts/" + TWILIOACCOUNTSID + "/Messages.json"
 
 	//Valorizza i campi per l'invio del SMS
 	v := url.Values{}
@@ -87,12 +87,11 @@ func Inviasms(to, body string) (result string, err error) {
 	}
 
 	//Utiliziamo l'autenticazione basic
-	req.SetBasicAuth(accountSid, authToken)
-	//Inseriamo un po' di headers come piacciono a Twilio
+	req.SetBasicAuth(TWILIOACCOUNTSID, TWILIOAUTHTOKEN)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	//Finalmente inviamo la request e salviamo la http response
+	// Inviamo la request e salviamo la http response
 	resp, err := client.Do(req)
 	if err != nil {
 		err = fmt.Errorf("Errore nella ricesione response: %s", err.Error())
