@@ -138,37 +138,38 @@ func addRep(nome, cognome, cellulare string) (ok bool, err error) {
 	if ok := sms.Verificacellulare(cellulare); ok != true {
 		return false, fmt.Errorf("Cellulare inserito non nel formato +39(10)cifre")
 	}
+
+	id, ok, _ := idRep(cognome)
+	if ok == true {
+		return false, fmt.Errorf("Reperibile già inserito %d", id)
+	}
 	db, err := Opendb(dbfile)
 	defer db.Close()
-	verificaprimachenonesistagia, err := db.Prepare("select count(*) from reperibile where cognome = ?")
+	/* 	verificaprimachenonesistagia, err := db.Prepare("select count(*) from reperibile where cognome = ?")
+
+	   	var exist interface{}
+	   	var num int
+	   	err = verificaprimachenonesistagia.QueryRow(cognome).Scan(&exist)
+
+	   	//fmt.Println(exist)
+	   	if exist.(int64) == 0 { */
+	addreperibile, err := db.Prepare("INSERT INTO reperibile (nome, cognome, cellulare) VALUES (?, ?,?)")
+
+	result, err := addreperibile.Exec(nome, cognome, cellulare)
+
+	num, err := result.RowsAffected()
 	if err != nil {
-		//fmt.Println(err.Error())
-		return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
+		return false, fmt.Errorf("Errore inserimento Reperibile")
 	}
 
-	var exist interface{}
-	err = verificaprimachenonesistagia.QueryRow(cognome).Scan(&exist)
-	if err != nil {
-		fmt.Println(err)
-	}
-	//fmt.Println(exist)
 	switch {
-	case exist.(int64) == 0:
-		addreperibile, err := db.Prepare("INSERT INTO reperibile (nome, cognome, cellulare) VALUES (?, ?,?)")
-		if err != nil {
-			//fmt.Println(err.Error())
-			return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
-		}
-		_, erraddrep := addreperibile.Exec(nome, cognome, cellulare)
-		if erraddrep != nil {
-			return false, fmt.Errorf("Impossibile inserire reperibile %s", err.Error())
-		}
-		return true, nil
-
+	case num > 0:
+		ok = true
 	default:
-		return false, fmt.Errorf("Impossibile inserire reperibile")
+		ok = false
 	}
 
+	return
 }
 
 //setRep assegna un reperibile al giorno
@@ -176,53 +177,33 @@ func setRep(giorno, cognome string) (ok bool, err error) {
 	db, err := Opendb(dbfile)
 	defer db.Close()
 	idrep, _, err := idRep(cognome)
-	if err != nil {
-		//fmt.Println(err.Error())
-		return false, fmt.Errorf("Id reperibile non trovato %s", err.Error())
-	}
-	verifica, err := db.Prepare("select count(*) from assegnazione where giorno = ?")
-	if err != nil {
-		return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
-	}
-	var exist interface{}
-	err = verifica.QueryRow(giorno).Scan(&exist)
-	if err != nil {
-		return false, fmt.Errorf("Impossibile contare assegnazioni")
-	}
-	switch {
-	case exist == 0:
-		goto INSERISCI
-	default:
-		cancella, err := db.Prepare("delete from assegnazione where giorno = ?")
-		if err != nil {
-			//fmt.Println(err.Error())
-			return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
-		}
-		_, err = cancella.Exec(giorno)
-		if err != nil {
-			return false, fmt.Errorf("Impossibile cancellare")
-		}
-		goto INSERISCI
-	}
-INSERISCI:
-	settaRep, err := db.Prepare("insert into assegnazione (giorno, reperibile_id) values(?,?)")
-	if err != nil {
-		//fmt.Println(err.Error())
-		return false, fmt.Errorf("Problema a preparare la query %s", err.Error())
-	}
-	_, err = settaRep.Exec(giorno, idrep)
-	if err != nil {
-		return false, fmt.Errorf("Problema a settare il reperibile %s", err.Error())
-	}
-	return true, nil
 
+	if idrep == 0 {
+		ok = false
+		return ok, fmt.Errorf("Reperibile non esiste")
+	}
+
+	mettigiorno, err := db.Prepare("insert into assegnazione (reperibile_id, giorno) values (?,?)")
+
+	result, err := mettigiorno.Exec(idrep, giorno)
+
+	num, err := result.RowsAffected()
+
+	switch {
+	case num == 1:
+		ok = true
+	default:
+		ok = false
+	}
+
+	return
 }
 
 //isRepSet informa se un Reperibile è stato impostato per il giorno e qual' è il suo id
 func isRepSet(giorno string) (ok bool, reperibileID int, err error) {
 	db, err := Opendb(dbfile)
 	defer db.Close()
-	cercagiorno, err := db.Prepare("select reperibile_id from assegnazione where giorno = ?")
+	cercagiorno, err := db.Prepare("select reperibile_id from assegnazione where giorno = ? order by id desc limit 1")
 
 	row := cercagiorno.QueryRow(giorno)
 

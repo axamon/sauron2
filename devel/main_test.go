@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -18,12 +19,20 @@ func TestAddRep(t *testing.T) {
 
 	var reps rep
 	reps = rep{
+		//Aggiungo un reperibile che in un nuova reperibilità
 		{Giorno: "20180101", Nome: "Rep1", Cognome: "Reperibile1", Cellulare: "+391234567891", AddRepOk: true, SetRepOk: true, isRepSetOk: true},
+		//aggiungo un secondo reperibile mai visto prima e un nuova reperibilità
 		{Giorno: "20180102", Nome: "Rep2", Cognome: "Reperibile2", Cellulare: "+391234567892", AddRepOk: true, SetRepOk: true, isRepSetOk: true},
+		//reperibile nuovo con cell sbagliato
 		{Giorno: "20180103", Nome: "Rep3", Cognome: "Reperibile3", Cellulare: "+39123456789", AddRepOk: false, SetRepOk: false, isRepSetOk: false},
+		//altro rep con cell sbagliato
 		{Giorno: "20180104", Nome: "Rep4", Cognome: "Reperibile4", Cellulare: "3234567893", AddRepOk: false, SetRepOk: false, isRepSetOk: false},
-		{Giorno: "20180106", Nome: "Rep1", Cognome: "Reperibile1", Cellulare: "+391234567891", AddRepOk: false, SetRepOk: true, isRepSetOk: true},
-		{Giorno: "20180106", Nome: "Rep1", Cognome: "Reperibile1", Cellulare: "+391234567891", AddRepOk: false, SetRepOk: true, isRepSetOk: true},
+		//Reitero un inserimento fatto in precedenza
+		{Giorno: "20180101", Nome: "Rep1", Cognome: "Reperibile1", Cellulare: "+391234567891", AddRepOk: false, SetRepOk: true, isRepSetOk: true},
+		//Cambio una reperibità esistente
+		{Giorno: "20180102", Nome: "Rep1", Cognome: "Reperibile1", Cellulare: "+391234567891", AddRepOk: false, SetRepOk: true, isRepSetOk: true},
+		//Cambio una reperibilità esistente con un nuovo reperibile
+		//	{Giorno: "20180102", Nome: "Rep4", Cognome: "Reperibile4", Cellulare: "+391234567894", AddRepOk: true, SetRepOk: false, isRepSetOk: true},
 	}
 
 	for _, Rep := range reps {
@@ -37,7 +46,7 @@ func TestAddRep(t *testing.T) {
 	for _, Rep := range reps {
 
 		if ok, err := setRep(Rep.Giorno, Rep.Cognome); ok != Rep.SetRepOk {
-			t.Error("Problema ad aggiornare la reperibilità", err.Error())
+			t.Error("Problema ad aggiornare la reperibilità", err.Error(), Rep)
 		}
 
 	}
@@ -53,7 +62,7 @@ func TestAddRep(t *testing.T) {
 		}
 		if ok == true {
 			if Rep.Cognome != info.Cognome {
-				t.Skip("Reperibile cambiato forse", err.Error())
+				fmt.Println("Reperibile cambiato forse")
 			}
 		}
 
