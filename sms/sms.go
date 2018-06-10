@@ -89,5 +89,7 @@ func Inviasms(to, body string) (result string, err error) {
 	//Restituisce codice e significato, se ricevi 201 CREATED allora è ok.
 	//fmt.Println(resp.Status)
 
+	raven.CaptureMessage(resp.Status, nil)
+
 	return
 }

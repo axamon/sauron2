@@ -118,9 +118,7 @@ func Reperibiliperpiattaforma2(piatta, file string) (contatto Reperibile, err er
 	var limite7 = time.Date(t.Year(), t.Month(), t.Day(), 7, 0, 0, 0, t.Location())
 
 	csvFile, err := os.Open(file)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "errore", err.Error())
-	}
+
 	defer csvFile.Close()
 	reader := csv.NewReader(bufio.NewReader(csvFile))
 	//TODO Viene ricreato contatti da zero è corretto?
@@ -181,50 +179,7 @@ func Reperibiliperpiattaforma2(piatta, file string) (contatto Reperibile, err er
 		}
 
 	}
-	return contatto, fmt.Errorf("%s", "Nessun reperibile trovato")
-}
-
-/* //Verificacellulare risponde ok se il numero inzia con +39 e si compone di 10 cifre
-func Verificacellulare(CELLULARE string) (ok bool) {
-
-	re := regexp.MustCompile(`^\+39[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$`)
-	return re.MatchString(CELLULARE)
-
-} */
-
-//Inseriscireperibile inserisce una nuova reperibilità
-func Inseriscireperibile(GIORNO, PIATTAFORMA, GRUPPO, NOME, COGNOME, CELLULARE string) (ok bool) {
-
-	GIORNOINT, err := strconv.Atoi(GIORNO)
-	if err != nil {
-		log.Fatal("Inserito un giorno non nel formato YYYYMMGG")
-	}
-	oggiint, _ := strconv.Atoi(oggi)
-	if GIORNOINT < oggiint {
-		log.Fatal("vabbè mo mettemo le reperibilità nel passato")
-	}
-	/*
-		if Verificacellulare(CELLULARE) == false {
-			log.Fatal("numero di cellulare non supportato, deve essere del tipo +39xxxxxxxxxx")
-		} */
-
-	value := []string{GIORNO, PIATTAFORMA, GRUPPO, NOME, COGNOME, CELLULARE}
-
-	file, err := os.OpenFile(*filecsv, os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-
-	err = writer.Write(value)
-	if err != nil {
-		log.Fatal(err)
-		return false
-	}
-	writer.Flush()
-	return true
+	return
 }
 
 func recuperavariabile(variabile string) (result string, err error) {
@@ -242,7 +197,7 @@ func recuperavariabilecifrata(variabile, passwd string) (result string, err erro
 	return "", fmt.Errorf("la variabile %s non esiste o è vuota", variabile)
 }
 
-//Chiamareperibile2 chiama il reperibile al telefono e comunica il problema in corso
+/* //Chiamareperibile2 chiama il reperibile al telefono e comunica il problema in corso
 //le informazioni per le API di Twilio le recupera cifrate e le decripta
 func Chiamareperibile2(TO, NOME, COGNOME string) (sid string, err error) {
 
@@ -310,27 +265,18 @@ func Chiamareperibile2(TO, NOME, COGNOME string) (sid string, err error) {
 
 	return "", fmt.Errorf("Sid non presente, problemi di auteticazione forse")
 
-}
+} */
 
 //Chiamareperibile chiama il reperibile al telefono e comunica il problema in corso
 func Chiamareperibile(TO, NOME, COGNOME string) (sid string, err error) {
 
 	twilionumber, err := recuperavariabile("TWILIONUMBER")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-	}
 
 	//Recupera l'accountsid di Twilio dallla variabile d'ambiente
 	accountSid, err := recuperavariabile("TWILIOACCOUNTSID")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-	}
 
 	//Recupera il token supersegreto dalla variabile d'ambiente
 	authToken, err := recuperavariabile("TWILIOAUTHTOKEN")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-	}
 
 	//Questa è la url di Twilio per le chiamate vocali
 	urlStr := "https://api.twilio.com/2010-04-01/Accounts/" + accountSid + "/Calls.json"
@@ -348,18 +294,13 @@ func Chiamareperibile(TO, NOME, COGNOME string) (sid string, err error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest("POST", urlStr, &rb)
-	if err != nil {
-		fmt.Fprintln(os.Stdout, "OH noooo! Qualcosa è andata storta nel creare la richiesta", err)
-	}
+
 	req.SetBasicAuth(accountSid, authToken)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Fprintln(os.Stdout, "OH noooo! Qualcosa è andata storta nell'inviare la richiesta", err.Error())
-	}
-	defer resp.Body.Close()
+
 	// make request
 	var data map[string]interface{}
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
@@ -373,15 +314,14 @@ func Chiamareperibile(TO, NOME, COGNOME string) (sid string, err error) {
 			return "", err
 		}
 	}
+	defer resp.Body.Close()
 	//fmt.Println(data) //debug
 
 	//se la mappa contiene un valore per sid lo ritorna
 	if val, ok := data["sid"]; ok {
 		sid = val.(string)
-		return sid, nil
 	}
 
-	//Se nella risposta non c'è indicazione del sid ritorna un errore
-	return "", fmt.Errorf("Sid non presente, problemi di auteticazione forse")
+	return
 
 }

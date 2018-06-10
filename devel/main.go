@@ -30,6 +30,7 @@ type Assegnazione struct {
 	ReperibileID uint
 }
 
+//t è il timestamp di adesso
 var t = time.Now()
 
 //limite delle 7 fino alle 7 del mattino seguente il reperibile che viene visualizzato è quello del giorno prima
@@ -45,7 +46,10 @@ var piattaforma = flag.String("p", "CDN", "La piattaforma di cui desideri ricava
 var contatti []Reperibile
 
 const (
-	dbfile           = "reperibili.db"
+	//il file dove creare il DB
+	dbfile = "reperibili.db"
+
+	//Crea la tabella dei reperibili
 	createreperibile = `
 	CREATE TABLE IF NOT EXISTS reperibile (
 		id	integer PRIMARY KEY AUTOINCREMENT,
@@ -54,6 +58,7 @@ const (
 		cellulare	varchar ( 255 )
 	);`
 
+	//Crea la tabella delle reperibilità
 	createassegnazione = `
 	CREATE TABLE IF NOT EXISTS assegnazione (
 		id	integer PRIMARY KEY AUTOINCREMENT,
@@ -67,6 +72,7 @@ const (
 	);`
 )
 
+//Male non fa
 var db *sql.DB
 
 //InitDB inzializza il database e restituisce la risorsa
@@ -217,34 +223,39 @@ func isRepSet(giorno string) (ok bool, reperibileID int, err error) {
 	db, err := Opendb(dbfile)
 	defer db.Close()
 	cercagiorno, err := db.Prepare("select reperibile_id from assegnazione where giorno = ?")
-	if err != nil {
-		return false, -1, fmt.Errorf("errore: %v", err.Error())
-	}
+
 	row := cercagiorno.QueryRow(giorno)
+
 	err = row.Scan(&reperibileID)
-	if err != nil {
-		return false, -1, fmt.Errorf("errore: %v", err.Error())
+
+	switch {
+	case reperibileID > 0:
+		ok = true
+	default:
+		ok = false
 	}
-	return true, reperibileID, nil
+
+	return
 }
 
-//infoRep restituisce l'ID del reperibile su DB
+//infoRep restituisce informazioni del reperibile su DB
 func infoRep(idrep int) (ok bool, info Reperibile, err error) {
 	db, err := Opendb(dbfile)
 	defer db.Close()
 	retrieveinfo, err := db.Prepare("select nome, cognome, cellulare from reperibile where id = ? limit 1")
-	if err != nil {
-		//fmt.Println(err.Error())
-		return false, Reperibile{}, fmt.Errorf("Problema con la preparazione della query %s", err.Error())
-	}
+
 	row := retrieveinfo.QueryRow(idrep)
+
 	err = row.Scan(&info.Nome, &info.Cognome, &info.Cellulare)
-	if err != nil {
-		//fmt.Println(err.Error())
-		return false, Reperibile{}, fmt.Errorf("Id reperibile non trovato %s", err.Error())
+
+	switch {
+	case info.Cellulare != "":
+		ok = true
+	default:
+		ok = false
 	}
-	//fmt.Println(id) //debug
-	return true, info, nil
+
+	return
 
 }
 
@@ -252,20 +263,20 @@ func infoRep(idrep int) (ok bool, info Reperibile, err error) {
 func idRep(cognome string) (id int, ok bool, err error) {
 	db, err := Opendb(dbfile)
 	defer db.Close()
+
 	retrieveid, err := db.Prepare("select id from reperibile where cognome = ? limit 1")
-	if err != nil {
-		//fmt.Println(err.Error())
-		return -1, false, fmt.Errorf("Problema con la preparazione della query %s", err.Error())
-	}
+
 	row := retrieveid.QueryRow(cognome)
 	err = row.Scan(&id)
-	if err != nil {
-		//fmt.Println(err.Error())
-		return -1, false, fmt.Errorf("Id reperibile non trovato %s", err.Error())
-	}
-	//fmt.Println(id) //debug
-	return id, true, nil
 
+	switch {
+	case id > 0:
+		ok = true
+	default:
+		ok = false
+	}
+
+	return
 }
 
 //delRep cancella un reperibile
@@ -273,23 +284,20 @@ func delRep(idRep int) (ok bool, err error) {
 	db, err := Opendb(dbfile)
 	defer db.Close()
 	delid, err := db.Prepare("delete from reperibile where id = ?")
-	if err != nil {
-		//fmt.Println(err.Error())
-		return false, fmt.Errorf("Problema con la preparazione della query %s", err.Error())
-	}
+
 	delass, err := db.Prepare("delete from assegnazione where reperibile_id = ?")
-	if err != nil {
-		//fmt.Println(err.Error())
-		return false, fmt.Errorf("Problema con la preparazione della query %s", err.Error())
+
+	_, err = delass.Exec(idRep)
+
+	result, err := delid.Exec(idRep)
+	affect, err := result.RowsAffected()
+	switch {
+	case affect == 1:
+		ok = true
+
+	default:
+		ok = false
 	}
-	_, errass := delass.Exec(idRep)
-	if errass != nil {
-		return false, fmt.Errorf("Problema con la cancellazione delle reperibilità %s", err.Error())
-	}
-	_, errdel := delid.Exec(idRep)
-	if errdel != nil {
-		return false, fmt.Errorf("Problema con la cancellazione del reperibile %s", err.Error())
-	}
-	return true, nil
+	return
 
 }
