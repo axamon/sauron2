@@ -1,17 +1,43 @@
 package reperibili
 
 import (
-	"fmt"
 	"testing"
 )
 
-func TestVerificaPresenzaReperibili(t *testing.T) {
+func TestAddrep(t *testing.T) {
 
-	VerificaPresenzaReperibili("CDN", "../reperibilita.csv")
-	if ok, err := VerificaPresenzaReperibili("CDN", "../reperibilita.csv"); ok != true {
+	type rep []struct {
+		ID          int
+		Nome        string
+		Cognome     string
+		Cellulare   string
+		Piattaforma string
+		Giorno      string
+		Gruppo      string
+		Ok          bool
+	}
+
+	var reps rep
+	reps = rep{
+		//Aggiungo un reperibile che in un nuova reperibilità
+		{Giorno: "20180101", Nome: "Rep1", Cognome: "Reperibile1", Cellulare: "+391234567891", Piattaforma: "CDN", Gruppo: "Gruppo6", Ok: true},
+		//aggiungo un secondo reperibile mai visto prima e un nuova reperibilità
+		{Giorno: "20180102", Nome: "Rep2", Cognome: "Reperibile2", Cellulare: "+391234567892", Piattaforma: "CDN", Gruppo: "Gruppo6", Ok: true},
+		//Cellulare non buono
+		//{Giorno: "20180102", Nome: "Rep3", Cognome: "Reperibile3", Cellulare: "+39123456783", Piattaforma: "CDN", Gruppo: "Gruppo6", Ok: false},
+	}
+
+	for _, Rep := range reps {
+
+		err := AddRuota(Rep.Nome, Rep.Cognome, Rep.Cellulare, Rep.Piattaforma, Rep.Giorno, Rep.Gruppo)
 		if err != nil {
-			fmt.Println(err.Error())
+			t.Error("Problema nel settare il Reperibile", err.Error(), Rep)
 		}
-		t.Skip("Problema")
+
+		_, err = IDRuota(Rep.Giorno, Rep.Piattaforma)
+		if err != nil {
+			t.Error("Problema nel recuperare il Reperibile", err.Error(), Rep)
+		}
+
 	}
 }
