@@ -16,6 +16,7 @@ import (
 	//serve per gestire i db sqlite
 	"github.com/axamon/cripta"
 	"github.com/axamon/sauron2/sms"
+	//Import per la gestione dei DB sqlite
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -105,17 +106,19 @@ func IDRuota(giorno, piattaforma string) (id int, err error) {
 	return
 }
 
+//t è il timestamp di adesso
+var t = time.Now()
+
+//limite delle 7. Fino alle 7 del mattino seguente il reperibile che viene visualizzato è quello del giorno prima
+var limite7 = time.Date(t.Year(), t.Month(), t.Day(), 7, 0, 0, 0, t.Location())
+
+var ieri = time.Now().Add(-24 * time.Hour).Format("20060102")
+var oggi = time.Now().Format("20060102")
+
+var domani = time.Now().Add(24 * time.Hour).Format("20060102")
+
 //GetReperibile resistuisce le info del reperibile
 func GetReperibile(piattaforma string) (Reperibile Contatto, err error) {
-	//t è il timestamp di adesso
-	var t = time.Now()
-
-	//limite delle 7. Fino alle 7 del mattino seguente il reperibile che viene visualizzato è quello del giorno prima
-	var limite7 = time.Date(t.Year(), t.Month(), t.Day(), 7, 0, 0, 0, t.Location())
-
-	var ieri = time.Now().Add(-24 * time.Hour).Format("20060102")
-	var oggi = time.Now().Format("20060102")
-	//var domani = time.Now().Add(24 * time.Hour).Format("20060102")
 
 	db, err := Opendb(dbfile)
 	defer db.Close()
