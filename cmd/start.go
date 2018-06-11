@@ -134,7 +134,7 @@ var startCmd = &cobra.Command{
 				fmt.Println(line.Text) //debug
 
 				//recupera il reperibile odierno tenendo conta degli orari di reperibilità
-				reperibile, err := reperibili.Reperibiliperpiattaforma2(viper.GetString("piattaforma"), reperibilita)
+				reperibile, err := reperibili.GetReperibile(viper.GetString("piattaforma"))
 				if err != nil {
 					fmt.Fprintln(os.Stdout, err.Error())
 				}
@@ -219,7 +219,7 @@ var startCmd = &cobra.Command{
 				//Se ok allora manda solo sms senza chiamata
 				fmt.Println("ricevuto OK") //per debug
 
-				reperibile, err := reperibili.Reperibiliperpiattaforma2("CDN", reperibilita)
+				reperibile, err := reperibili.GetReperibile(viper.GetString("piattaforma"))
 				if err != nil {
 					fmt.Fprintln(os.Stderr, err.Error())
 				}
