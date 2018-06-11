@@ -29,38 +29,29 @@ func recuperavariabile(variabile string) (result string, err error) {
 	if result, ok := os.LookupEnv(variabile); ok && len(result) != 0 {
 		return result, nil
 	}
-	return "", fmt.Errorf("la variabile %s non esiste o è vuota", variabile)
+	err = fmt.Errorf("la variabile %s non esiste o è vuota", variabile)
+	fmt.Fprintln(os.Stderr, err.Error())
+	raven.CaptureError(err, nil)
+	return "", err
 }
 
 //Inviasms invia sms via Twilio
-func Inviasms(to, body string) (result string) {
+func Inviasms(to, body string) (result string, err error) {
 
 	//Recupera il numero di Twilio dallla variabile d'ambiente
 	TWILIONUMBER, err := recuperavariabile("TWILIONUMBER")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		raven.CaptureErrorAndWait(err, nil)
-	}
 
-	//Recupera l'accountsid di Twilio dallla variabile d'ambiente
-	accountSid, err := recuperavariabile("TWILIOACCOUNTSID")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		raven.CaptureErrorAndWait(err, nil)
-	}
+	//Recupera TWILIOACCOUNTSID  dallla variabile d'ambiente
+	TWILIOACCOUNTSID, err := recuperavariabile("TWILIOTWILIOACCOUNTSID")
 
 	//Recupera il token supersegreto dalla variabile d'ambiente
-	authToken, err := recuperavariabile("TWILIOAUTHTOKEN")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		raven.CaptureErrorAndWait(err, nil)
-	}
+	TWILIOAUTHTOKEN, err := recuperavariabile("TWILIOTWILIOAUTHTOKEN")
 
 	//TODO vedere se riesce a prendere anche le variabili da ambiente windows...
 	//...ma anche no! :)
 
 	//Crea la URL necessaria per richiamare la funzionalità degli SMS di Twilio
-	urlStr := "https://api.twilio.com/2010-04-01/Accounts/" + accountSid + "/Messages.json"
+	urlStr := "https://api.twilio.com/2010-04-01/Accounts/" + TWILIOACCOUNTSID + "/Messages.json"
 
 	//Valorizza i campi per l'invio del SMS
 	v := url.Values{}
@@ -76,29 +67,29 @@ func Inviasms(to, body string) (result string) {
 
 	//Creiamo la http request da inviare dopo
 	req, err := http.NewRequest("POST", urlStr, &rb)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "OH noooo! Qualcosa è andata storta nel creare la richiesta", err.Error())
-		raven.CaptureErrorAndWait(err, nil)
-	}
 
 	//Utiliziamo l'autenticazione basic
-	req.SetBasicAuth(accountSid, authToken)
-	//Inseriamo un po' di headers come piacciono a Twilio
+	req.SetBasicAuth(TWILIOACCOUNTSID, TWILIOAUTHTOKEN)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	//Finalmente inviamo la request e salviamo la http response
+	// Inviamo la request e salviamo la http response
 	resp, err := client.Do(req)
+
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "OH noooo! Qualcosa è andata storta nell'inviare la richiesta", err)
+		err = fmt.Errorf("Errore nella ricesione response: %s", err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
+		raven.CaptureError(err, nil)
+		//return "", err
 	}
+
+	result = resp.Status
 
 	//controlliamo che ha da dire la response
 	//Restituisce codice e significato, se ricevi 201 CREATED allora è ok.
 	//fmt.Println(resp.Status)
 
-	//Usciamo con zero che significa tutto ok!
-	//a quanto pare un exit qui ammazza anche la funzione padre che lo ha chiamato...
-	//os.Exit(0)
-	return resp.Status
+	raven.CaptureMessage(resp.Status, nil)
+
+	return
 }

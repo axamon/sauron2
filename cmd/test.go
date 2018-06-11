@@ -62,7 +62,12 @@ var testCmd = &cobra.Command{
 		}
 
 		messaggio := ("Notifiche vocali correttamente funzionanti")
-		result := sms.Inviasms(cellditest, messaggio)
+		result, err := sms.Inviasms(cellditest, messaggio)
+		if err != nil {
+			err = fmt.Errorf("Invio sms impossibile: %s", err.Error())
+			raven.CaptureErrorAndWait(err, nil)
+			os.Exit(1)
+		}
 
 		fmt.Println(result)
 		fmt.Println("test called")

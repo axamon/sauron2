@@ -65,8 +65,12 @@ func TestInviasms(t *testing.T) {
 		{Numcell: "+393353458144", Valido: true},
 	}
 	for _, num := range numeri {
-		if result := Inviasms(num.Numcell, "prova"); result != "201 CREATED" {
+		result, err := Inviasms(num.Numcell, "prova")
+		if result != "201 CREATED" {
 			t.Skip("Bisogna settare le variabili")
+		}
+		if err != nil {
+			t.Skip(fmt.Println(err.Error()))
 		}
 	}
 }
