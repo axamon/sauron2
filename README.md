@@ -8,4 +8,3 @@
 Sauron2 allows to trigger voice calls based on nagios logs using Twilio APIs.
 
 Golang 1.10.x is needed to compile.
-# sauron2go1
