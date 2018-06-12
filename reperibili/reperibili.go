@@ -13,9 +13,9 @@ import (
 
 	"database/sql"
 
-	//serve per gestire i db sqlite
 	"github.com/axamon/cripta"
 	"github.com/axamon/sauron2/sms"
+	//serve per gestire i db sqlite
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -136,7 +136,11 @@ func GetReperibile(piattaforma string) (Reperibile Contatto, err error) {
 
 	row := getrep.QueryRow(giorno, piattaforma)
 
-	row.Scan(&Reperibile.Nome, &Reperibile.Cognome, &Reperibile.Cellulare)
+	err = row.Scan(&Reperibile.Nome, &Reperibile.Cognome, &Reperibile.Cellulare)
+
+	if len(Reperibile.Cellulare) == 0 {
+		err = fmt.Errorf("Nessun reperibile settato")
+	}
 
 	return
 

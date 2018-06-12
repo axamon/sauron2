@@ -63,6 +63,17 @@ var startCmd = &cobra.Command{
 		piattaforma := viper.GetString("piattaforma")
 
 		fmt.Println(piattaforma) //Debug
+
+		reperibile, err := reperibili.GetReperibile(piattaforma)
+		if err != nil {
+			err = fmt.Errorf("Reperibile non settato per %s: %s", piattaforma, err.Error())
+			raven.CaptureError(err, nil)
+			fmt.Fprintln(os.Stdout, err.Error())
+			os.Exit(1)
+		}
+
+		fmt.Fprintf(os.Stdout, "il reperibile attuale è: %s cell: %s\n", reperibile.Cognome, reperibile.Cellulare)
+
 		/*
 			//Verifica se il file della reperibilita esiste e se è raggiungibile
 			if _, err := os.Stat(reperibilita); os.IsNotExist(err) {
@@ -76,7 +87,7 @@ var startCmd = &cobra.Command{
 		//Recupera file dei log nagios dal file di congigurazione
 		nagioslog := viper.GetString("Nagioslogfile")
 
-		fmt.Fprintln(os.Stdout, nagioslog) //Debug
+		fmt.Fprintf(os.Stdout, "Il file monitorato è: %s\n", nagioslog)
 
 		//Recupera il nome dell'utente nagios di servizio per le notifiche
 		nagiosuser := viper.GetString("Nagiosuser")
@@ -85,7 +96,7 @@ var startCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Println("Le notifiche inoltrate saranno quelle per l'utente", nagiosuser)
+		fmt.Fprintf(os.Stdout, "Le notifiche inoltrate saranno quelle per l'utente: %s\n", nagiosuser)
 
 		//Verifica se il file deli log nagios esiste e se è raggiungibile
 		if _, err := os.Stat(nagioslog); os.IsNotExist(err) {

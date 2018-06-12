@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 func TestPrimo(t *testing.T) {
@@ -46,4 +48,11 @@ func Exampleisfob() {
 	//Monday
 	//6
 	//true
+}
+
+func TestOrainizio(t *testing.T) {
+	foborainizio := viper.GetInt("foborainizio")
+	if foborainizio == 0 {
+		t.Skipf("Ora inizio non corretto %d:", foborainizio)
+	}
 }

@@ -26,13 +26,10 @@ import (
 // addrepCmd represents the addrep command
 var addrepCmd = &cobra.Command{
 	Use:   "addrep",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Inserisce le reperibilità",
+	Long: `Sintassi:
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+sauron2 addrep <nome> <cognome> <cellulare> <piattaforma> <giorno> <gruppo>`,
 	Run: func(cmd *cobra.Command, args []string) {
 		nome := args[0]
 		cognome := args[1]
@@ -49,7 +46,7 @@ to quickly create a Cobra application.`,
 		}
 		rep, err := reperibili.GetReperibile("CDN")
 		if err != nil {
-			err = fmt.Errorf("Impossibile trovare reperibile odierno: %s", err.Error())
+			err = fmt.Errorf("Impossibile trovare reperibile odierno: %s\n Lanciare addrep per aggngere", err.Error())
 			fmt.Fprintln(os.Stderr, err.Error())
 			log.Fatal(err.Error())
 		}
